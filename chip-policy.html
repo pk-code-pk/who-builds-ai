@@ -1,0 +1,685 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chip Policy Shock Map</title>
+<meta name="description" content="Interactive 3D explorer of US-China AI/chip policy events against Nvidia, TSMC, Google and AMD stock prices (2018-present).">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme: light;
+  --bg:#f4f3ef; --surface-1:#fcfcfb; --surface-2:#f0efec; --border:#e2e0da;
+  --text-primary:#0b0b0b; --text-secondary:#52514e; --text-muted:#7c7a74;
+  --grid:#e4e2dc; --stem:#c9c6be; --accent:#2a78d6;
+  --pos:#2a78d6; --neg:#e34948; --div-mid:#f0efec;
+  /* company slots: validated all-pairs (4 series) in both modes */
+  --k1:#2a78d6; --k2:#eb6834; --k3:#1baf7a; --k4:#cc32ad;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+    --bg:#111110; --surface-1:#1a1a19; --surface-2:#242422; --border:#33322f;
+    --text-primary:#ffffff; --text-secondary:#c3c2b7; --text-muted:#8f8d85;
+    --grid:#2e2d2a; --stem:#4a4844; --accent:#3987e5;
+    --pos:#3987e5; --neg:#e66767; --div-mid:#383835;
+    --k1:#3987e5; --k2:#d95926; --k3:#199e70; --k4:#cc32ad;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --bg:#111110; --surface-1:#1a1a19; --surface-2:#242422; --border:#33322f;
+  --text-primary:#ffffff; --text-secondary:#c3c2b7; --text-muted:#8f8d85;
+  --grid:#2e2d2a; --stem:#4a4844; --accent:#3987e5;
+  --pos:#3987e5; --neg:#e66767; --div-mid:#383835;
+  --k1:#3987e5; --k2:#d95926; --k3:#199e70; --k4:#cc32ad;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--text-primary);font:14px/1.5 Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+.wrap{max-width:1360px;margin:0 auto;padding:24px 16px 48px}
+header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:16px}
+.back{display:inline-block;margin-bottom:6px;font-size:12px;color:var(--text-muted);text-decoration:none}
+.back:hover{color:var(--accent)}
+h1{font-size:22px;font-weight:700;margin:0 0 4px;letter-spacing:-.01em}
+.sub{color:var(--text-secondary);margin:0;max-width:820px}
+.btn{border:1px solid var(--border);background:var(--surface-1);color:var(--text-secondary);border-radius:8px;padding:6px 10px;cursor:pointer;font:inherit;white-space:nowrap}
+.card{background:var(--surface-1);border:1px solid var(--border);border-radius:12px}
+.filters{display:flex;flex-wrap:wrap;gap:12px 22px;align-items:flex-end;padding:14px 16px;margin-bottom:16px}
+.f{display:flex;flex-direction:column;gap:4px;min-width:0}
+.lbl{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)}
+select,input[type=date]{font:inherit;color:var(--text-primary);background:var(--surface-2);border:1px solid var(--border);border-radius:8px;padding:5px 8px;min-height:32px}
+.seg{display:flex;flex-wrap:wrap;gap:4px}
+.seg button,.chip{font:inherit;font-size:13px;border:1px solid var(--border);background:var(--surface-2);color:var(--text-secondary);border-radius:999px;padding:4px 11px;cursor:pointer}
+.seg button[aria-pressed=true]{background:var(--text-primary);color:var(--surface-1);border-color:var(--text-primary)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{display:inline-flex;align-items:center;gap:6px}
+.chip .sw{width:10px;height:10px;border-radius:50%;background:var(--sw)}
+.chip .gl{font-size:12px;color:var(--text-primary);width:12px;text-align:center}
+.chip[aria-pressed=false]{opacity:.45;text-decoration:line-through}
+.chip.co[aria-pressed=true]{border-color:var(--sw);color:var(--text-primary)}
+label.chk{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--text-secondary);cursor:pointer}
+.panel{padding:16px;margin-bottom:16px}
+.panel-h{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:10px 20px;margin-bottom:8px}
+h2{font-size:13px;font-weight:600;margin:0;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.06em}
+.note{color:var(--text-muted);font-size:12px;margin:2px 0 0}
+#brush{width:100%;height:290px}
+.explorer{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:16px}
+.axes{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:flex-end}
+.axes .f select{min-width:150px}
+#plot3d{width:100%;height:600px}
+.side{display:flex;flex-direction:column;gap:12px;min-width:0}
+.box{background:var(--surface-2);border-radius:10px;padding:12px}
+.box h3{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);margin:0 0 6px}
+.ev-date{font-size:12px;color:var(--text-muted)}
+.ev-name{font-size:16px;font-weight:700;line-height:1.3;margin:2px 0 4px}
+.ev-meta{font-size:12px;color:var(--text-secondary)}
+.ev-desc{margin:8px 0 4px;font-size:13px}
+.ev-src{font-size:12px;color:var(--text-muted)}
+.mini{width:100%;border-collapse:collapse;font-size:12.5px;font-variant-numeric:tabular-nums}
+.mini th{font-weight:600;color:var(--text-muted);text-align:right;padding:3px 4px;font-size:11px}
+.mini th:first-child,.mini td:first-child{text-align:left}
+.mini td{padding:3px 4px;text-align:right;border-top:1px solid var(--border)}
+.key{display:inline-block;width:14px;height:3px;border-radius:2px;vertical-align:middle;margin-right:6px}
+.hint{color:var(--text-muted);font-size:13px;margin:0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.hm{width:100%;height:300px}
+#strip{width:100%;height:360px}
+.tbl-wrap{overflow:auto;max-height:520px}
+table.ev{width:100%;border-collapse:collapse;font-size:13px}
+table.ev th{position:sticky;top:0;background:var(--surface-1);text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);padding:8px;border-bottom:1px solid var(--border);cursor:pointer;user-select:none;white-space:nowrap}
+table.ev td{padding:7px 8px;border-bottom:1px solid var(--border);vertical-align:top}
+table.ev td.num,table.ev th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+table.ev tbody tr{cursor:pointer}
+table.ev tbody tr:hover{background:var(--surface-2)}
+table.ev tbody tr.sel{background:var(--surface-2);box-shadow:inset 3px 0 0 var(--accent)}
+.neg{color:var(--neg)} .pos{color:var(--pos)}
+.tag{display:inline-block;font-size:11px;padding:0 6px;border-radius:999px;border:1px solid var(--border);margin:1px 2px 1px 0;color:var(--text-secondary)}
+footer{color:var(--text-muted);font-size:12px}
+footer p{margin:6px 0}
+@media (max-width:1040px){
+  .explorer{grid-template-columns:1fr}
+  .grid2{grid-template-columns:1fr}
+  #plot3d{height:500px}
+}
+@media (max-width:560px){
+  header{flex-direction:column}
+  .col-cat,.col-rel{display:none}
+  #plot3d{height:420px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <a class="back" href="index.html">← Back to the chip</a>
+      <h1>Chip Policy Shock Map</h1>
+      <p class="sub">How Nvidia, TSMC, Google and AMD stocks move around US&ndash;China export controls, tariffs, diplomacy, Chinese countermeasures and product launches, 2018&ndash;present. Brush a date range, pick any three dimensions, and rotate the 3D view to look for relationships.</p>
+    </div>
+    <button class="btn" id="themeBtn" type="button" aria-label="Toggle color theme">Theme: auto</button>
+  </header>
+
+  <section class="card filters" aria-label="Filters">
+    <div class="f"><span class="lbl">Companies</span><div class="chips" id="cos"></div></div>
+    <div class="f"><span class="lbl">Date range</span><div class="seg" id="presets"></div></div>
+    <div class="f"><label class="lbl" for="from">From</label><input type="date" id="from"></div>
+    <div class="f"><label class="lbl" for="to">To</label><input type="date" id="to"></div>
+    <div class="f" style="flex-basis:100%">
+      <span class="lbl">Event categories <span style="text-transform:none;letter-spacing:0;font-weight:400">(marker shape)</span></span>
+      <div class="chips" id="cats"></div>
+    </div>
+    <div class="f"><label class="chk"><input type="checkbox" id="relOnly" checked> Only events tagged to each company</label></div>
+  </section>
+
+  <section class="card panel">
+    <div class="panel-h">
+      <div><h2>Brush a date range</h2><p class="note">Growth of $100 invested on the first day shown (log scale). Drag the handles in the strip below, or drag across the chart to zoom in. Double-click to reset. Every chart below follows this range.</p></div>
+    </div>
+    <div id="brush"></div>
+  </section>
+
+  <section class="card panel">
+    <div class="panel-h">
+      <div><h2>3D explorer</h2><p class="note" id="modeNote"></p></div>
+      <div class="axes">
+        <div class="f"><span class="lbl">Each point is</span>
+          <div class="seg" id="mode">
+            <button type="button" data-v="daily" aria-pressed="true">A trading day</button>
+            <button type="button" data-v="event" aria-pressed="false">An event reaction</button>
+          </div>
+        </div>
+        <div class="f"><label class="lbl" for="ax">X axis</label><select id="ax"></select></div>
+        <div class="f"><label class="lbl" for="ay">Y axis</label><select id="ay"></select></div>
+        <div class="f"><label class="lbl" for="az">Z axis</label><select id="az"></select></div>
+        <div class="f" id="drawBox"><span class="lbl">Draw</span>
+          <div class="seg" id="draw">
+            <button type="button" data-v="lines" aria-pressed="true">Lines</button>
+            <button type="button" data-v="points" aria-pressed="false">Points</button>
+          </div>
+        </div>
+        <div class="f"><label class="chk"><input type="checkbox" id="logScale"> Log price axes</label>
+          <label class="chk" id="evBox"><input type="checkbox" id="showEv" checked> Mark events</label></div>
+        <button class="btn" type="button" id="resetCam">Reset view</button>
+      </div>
+    </div>
+    <div class="explorer">
+      <div id="plot3d" role="img" aria-label="3D chart; axes chosen by the selectors above"></div>
+      <aside class="side">
+        <div class="box"><h3>Correlation in view (Pearson r)</h3><div id="corrBox"></div></div>
+        <div class="box" id="detail" aria-live="polite"></div>
+      </aside>
+    </div>
+  </section>
+
+  <section class="grid2">
+    <div class="card panel">
+      <h2>Daily-return correlation</h2>
+      <p class="note">How closely the companies' daily returns move together within the brushed range.</p>
+      <div id="hm1" class="hm"></div>
+    </div>
+    <div class="card panel">
+      <h2>Event-reaction correlation</h2>
+      <p class="note">Correlation of 5-day reactions across the events in range (all events, so pairs are comparable).</p>
+      <div id="hm2" class="hm"></div>
+    </div>
+  </section>
+
+  <section class="card panel">
+    <h2>Reaction by event type</h2>
+    <p class="note">Each dot is one company's return from the close before an event to 5 trading days later. The tick marks each company's median. A historical event study, not a forecast.</p>
+    <div id="strip"></div>
+  </section>
+
+  <section class="card panel">
+    <h2>Event table</h2>
+    <p class="note">5-day reactions per company. Click a row to highlight it in the charts.</p>
+    <div class="tbl-wrap">
+      <table class="ev" id="tbl"><thead><tr></tr></thead><tbody></tbody></table>
+    </div>
+  </section>
+
+  <footer>
+    <p><strong>Data.</strong> Prices: daily split-adjusted closes (Yahoo Finance; TSMC is the NYSE-listed ADR). Events: curated from Reuters, Bloomberg, NYT, FT, CNBC and official BIS / USTR / MOFCOM / SAMR / company releases &mdash; see <code>data/us_china_ai_chip_events.xlsx</code>. Event date = the day it occurred or was first reported; reactions use the first trading day on or after it. Reactions are raw, not market-adjusted.</p>
+    <p>Educational project; not investment advice. <span id="gen"></span></p>
+  </footer>
+</div>
+
+<script src="vendor/plotly.min.js"></script>
+<script src="data/dashboard_data.js"></script>
+<script>
+(() => {
+  "use strict";
+  const D = window.DASHBOARD_DATA;
+  const TICKERS = Object.keys(D.companies);
+  const CATS = ["US Export Control", "US Tariffs & Industrial Policy", "China Action", "Diplomacy", "Product Launch", "Corporate & Market", "AI Industry"];
+  const SYM = ["circle", "diamond", "square", "cross", "x", "circle-open", "diamond-open"];
+  const GLYPH = ["●", "◆", "■", "✚", "✖", "○", "◇"];
+  const SYM2D = ["circle", "diamond", "square", "cross", "x", "circle-open", "diamond-open"];
+  const DATES = D.companies[TICKERS[0]].dates;            // all tickers share one trading calendar
+  const N = DATES.length;
+  const $ = (id) => document.getElementById(id);
+  const css = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+  const coColor = (t) => css("--k" + (TICKERS.indexOf(t) + 1));
+  const fmtDate = (s) => { const [y, m, d] = s.split("-"); return `${+m}/${+d}/${y}`; };
+  const pct = (r) => (r == null || isNaN(r) ? "–" : (r >= 0 ? "+" : "−") + Math.abs(r * 100).toFixed(1) + "%");
+  const cls = (r) => (r == null || isNaN(r) ? "" : r < 0 ? "neg" : "pos");
+  const lb = (arr, x) => { let lo = 0, hi = arr.length; while (lo < hi) { const m = (lo + hi) >> 1; arr[m] < x ? lo = m + 1 : hi = m; } return lo; };
+  const mk = (tag, cl, txt) => { const n = document.createElement(tag); if (cl) n.className = cl; if (txt != null) n.textContent = txt; return n; };
+
+  // ---------- precompute per company ----------
+  const C = {};
+  TICKERS.forEach((t) => {
+    const c = D.companies[t].close, ret = new Array(N).fill(null), vol = new Array(N).fill(null);
+    for (let i = 1; i < N; i++) ret[i] = c[i] / c[i - 1] - 1;
+    for (let i = 20; i < N; i++) {
+      let s = 0, s2 = 0; for (let k = i - 19; k <= i; k++) { s += ret[k]; s2 += ret[k] * ret[k]; }
+      const m = s / 20; vol[i] = Math.sqrt(Math.max(s2 / 20 - m * m, 0) * 252);
+    }
+    C[t] = { close: c, ret, vol, name: D.companies[t].name };
+  });
+  const EV = D.events.map((e, idx) => {
+    const i = lb(DATES, e.date);
+    const o = { ...e, idx, i: i < N ? i : null, tradeDate: i < N ? DATES[i] : null, rel: (e.companies || "").split(/\s+/).filter(Boolean), r: {} };
+    TICKERS.forEach((t) => {
+      const c = C[t].close, R = { r1: null, r5: null, r20: null, prevol: null };
+      if (o.i != null && o.i > 0) {
+        const p = c[o.i - 1];
+        R.r1 = c[o.i] / p - 1;
+        if (o.i + 4 < N) R.r5 = c[o.i + 4] / p - 1;
+        if (o.i + 19 < N) R.r20 = c[o.i + 19] / p - 1;
+        R.prevol = C[t].vol[o.i - 1];
+      }
+      o.r[t] = R;
+    });
+    return o;
+  });
+
+  // ---------- state ----------
+  const state = {
+    cos: new Set(TICKERS), cats: new Set(CATS), relOnly: true,
+    from: DATES[0], to: DATES[N - 1], preset: "all",
+    mode: "daily", draw: "lines", log: false, showEv: true,
+    axes: { daily: ["date", "company", "idx"], event: ["date", "category", "r5"] },
+    selected: null, sortK: "date", sortDir: 1,
+  };
+
+  // ---------- dimensions ----------
+  const DIMS = {
+    daily: {
+      date: { label: "Date", type: "date" },
+      company: { label: "Company", type: "lane" },
+      idx: { label: "Growth of $100 (from range start)", type: "num", price: true, fmt: (v) => "$" + v.toFixed(0) },
+      price: { label: "Share price (USD)", type: "num", price: true, fmt: (v) => "$" + v.toFixed(2) },
+      ret: { label: "Daily return (%)", type: "num", pctAxis: true, fmt: (v) => v.toFixed(2) + "%" },
+      vol: { label: "20-day volatility, annualized (%)", type: "num", pctAxis: true, fmt: (v) => v.toFixed(0) + "%" },
+      dd: { label: "Drawdown from range high (%)", type: "num", pctAxis: true, fmt: (v) => v.toFixed(1) + "%" },
+      since: { label: "Trading days since last event", type: "num", fmt: (v) => v.toFixed(0) },
+    },
+    event: {
+      date: { label: "Event date", type: "date" },
+      category: { label: "Event category", type: "lane" },
+      company: { label: "Company", type: "lane" },
+      r1: { label: "1-day reaction (%)", type: "num", pctAxis: true, fmt: (v) => v.toFixed(1) + "%" },
+      r5: { label: "5-day reaction (%)", type: "num", pctAxis: true, fmt: (v) => v.toFixed(1) + "%" },
+      r20: { label: "20-day reaction (%)", type: "num", pctAxis: true, fmt: (v) => v.toFixed(1) + "%" },
+      prevol: { label: "Pre-event 20-day volatility (%)", type: "num", pctAxis: true, fmt: (v) => v.toFixed(0) + "%" },
+      idx: { label: "Growth of $100 at event", type: "num", price: true, fmt: (v) => "$" + v.toFixed(0) },
+    },
+  };
+
+  // ---------- controls ----------
+  const cosBox = $("cos");
+  TICKERS.forEach((t) => {
+    const b = mk("button", "chip co"); b.type = "button"; b.setAttribute("aria-pressed", true); b._t = t;
+    b.appendChild(mk("span", "sw")); b.appendChild(document.createTextNode(`${C[t].name} (${t})`));
+    b.onclick = () => { state.cos.has(t) ? state.cos.delete(t) : state.cos.add(t); if (!state.cos.size) state.cos.add(t); syncChips(); renderAll(true); };
+    cosBox.appendChild(b);
+  });
+  const catBox = $("cats");
+  CATS.forEach((c, i) => {
+    const b = mk("button", "chip"); b.type = "button"; b.setAttribute("aria-pressed", true); b._c = c;
+    b.appendChild(mk("span", "gl", GLYPH[i])); b.appendChild(document.createTextNode(c));
+    b.onclick = () => { state.cats.has(c) ? state.cats.delete(c) : state.cats.add(c); syncChips(); renderAll(true); };
+    catBox.appendChild(b);
+  });
+  function syncChips() {
+    [...cosBox.children].forEach((b) => { b.setAttribute("aria-pressed", state.cos.has(b._t)); b.style.setProperty("--sw", coColor(b._t)); });
+    [...catBox.children].forEach((b) => b.setAttribute("aria-pressed", state.cats.has(b._c)));
+  }
+  $("relOnly").onchange = (e) => { state.relOnly = e.target.checked; renderAll(true); };
+
+  const PRESETS = [["all", "All", DATES[0], DATES[N - 1]], ["tw", "Trade war 2018–20", "2018-01-01", "2020-12-31"], ["ec", "Export-control era", "2022-08-01", DATES[N - 1]], ["t2", "2025–present", "2025-01-01", DATES[N - 1]], ["1y", "Last 12 mo", null, DATES[N - 1]]];
+  const presetBox = $("presets");
+  PRESETS.forEach(([k, label]) => { const b = mk("button", null, label); b.type = "button"; b.dataset.v = k; b.onclick = () => applyPreset(k); presetBox.appendChild(b); });
+  function applyPreset(k) {
+    const p = PRESETS.find((x) => x[0] === k);
+    let from = p[2];
+    if (k === "1y") { const d = new Date(DATES[N - 1]); d.setFullYear(d.getFullYear() - 1); from = d.toISOString().slice(0, 10); }
+    setRange(from, p[3], k, true);
+  }
+  function setRange(from, to, preset, moveBrush) {
+    from = from < DATES[0] ? DATES[0] : from; to = to > DATES[N - 1] ? DATES[N - 1] : to;
+    if (from > to) [from, to] = [to, from];
+    state.from = from; state.to = to; state.preset = preset;
+    $("from").value = from; $("to").value = to;
+    [...presetBox.children].forEach((b) => b.setAttribute("aria-pressed", b.dataset.v === preset));
+    if (moveBrush) renderBrush(); else updateBrushRebase();
+    renderAll(false);
+  }
+  $("from").onchange = $("to").onchange = () => setRange($("from").value || state.from, $("to").value || state.to, "custom", true);
+
+  function seg(id, fn) { const box = $(id); box.querySelectorAll("button").forEach((b) => b.onclick = () => { box.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", x === b)); fn(b.dataset.v); }); }
+  seg("mode", (v) => { state.mode = v; state.camera = null; fillAxisSelects(); render3d(true); });
+  seg("draw", (v) => { state.draw = v; render3d(); });
+  $("logScale").onchange = (e) => { state.log = e.target.checked; render3d(); };
+  $("showEv").onchange = (e) => { state.showEv = e.target.checked; render3d(); };
+  $("resetCam").onclick = () => render3d(true);
+  ["ax", "ay", "az"].forEach((id, k) => $(id).onchange = (e) => {
+    const ax = state.axes[state.mode]; const v = e.target.value; const j = ax.indexOf(v);
+    if (j >= 0 && j !== k) ax[j] = ax[k];  // swap so the three axes stay distinct
+    ax[k] = v; fillAxisSelects(); render3d(true);
+  });
+  function fillAxisSelects() {
+    const dims = DIMS[state.mode], ax = state.axes[state.mode];
+    ["ax", "ay", "az"].forEach((id, k) => {
+      const s = $(id); s.textContent = "";
+      Object.entries(dims).forEach(([key, d]) => { const o = mk("option", null, d.label); o.value = key; s.appendChild(o); });
+      s.value = ax[k];
+    });
+    $("drawBox").style.display = state.mode === "daily" ? "" : "none";
+    $("evBox").style.display = state.mode === "daily" ? "" : "none";
+    $("modeNote").textContent = state.mode === "daily"
+      ? "One point per company per trading day in the brushed range. Event markers sit on each company's path (shape = category)."
+      : "One point per company per event in range (shape = category, color = company). Reactions are measured from the prior close.";
+  }
+
+  const themeBtn = $("themeBtn"); const modes = ["auto", "light", "dark"]; let theme = "auto";
+  themeBtn.onclick = () => {
+    theme = modes[(modes.indexOf(theme) + 1) % 3];
+    if (theme === "auto") document.documentElement.removeAttribute("data-theme"); else document.documentElement.setAttribute("data-theme", theme);
+    themeBtn.textContent = "Theme: " + theme; syncChips(); renderBrush(); renderAll(true);
+  };
+  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { syncChips(); renderBrush(); renderAll(true); });
+
+  // ---------- helpers ----------
+  const rangeIdx = () => [lb(DATES, state.from), Math.min(lb(DATES, state.to + "~"), N) - 1];
+  const activeCos = () => TICKERS.filter((t) => state.cos.has(t));
+  const eventsInRange = () => EV.filter((e) => e.i != null && e.date >= state.from && e.date <= state.to && state.cats.has(e.category));
+  const relevant = (e, t) => !state.relOnly || e.rel.includes(t);
+  function pearson(a, b) {
+    let n = 0, sa = 0, sb = 0, saa = 0, sbb = 0, sab = 0;
+    for (let i = 0; i < a.length; i++) { const x = a[i], y = b[i]; if (x == null || y == null || isNaN(x) || isNaN(y)) continue; n++; sa += x; sb += y; saa += x * x; sbb += y * y; sab += x * y; }
+    if (n < 3) return null; const cov = sab - sa * sb / n, va = saa - sa * sa / n, vb = sbb - sb * sb / n;
+    return va > 0 && vb > 0 ? cov / Math.sqrt(va * vb) : null;
+  }
+  const baseLayout = () => ({
+    paper_bgcolor: "rgba(0,0,0,0)", plot_bgcolor: "rgba(0,0,0,0)",
+    font: { family: "Inter, system-ui, sans-serif", size: 12, color: css("--text-secondary") },
+    hoverlabel: { bgcolor: css("--surface-1"), bordercolor: css("--border"), font: { color: css("--text-primary"), size: 12 } },
+  });
+  const CFG = { responsive: true, displaylogo: false };
+
+  // ---------- brush (overview with range slider) ----------
+  let brushing = false;
+  function renderBrush() {
+    const traces = activeCos().map((t) => {
+      const c = C[t].close, base = c[0];
+      return { type: "scatter", mode: "lines", name: t, x: DATES, y: c.map((v) => 100 * v / base), line: { color: coColor(t), width: 1.6 },
+        hovertemplate: `<b>$%{y:,.0f}</b> ${t}<extra></extra>` };
+    });
+    const layout = {
+      ...baseLayout(), margin: { l: 56, r: 16, t: 8, b: 8 }, hovermode: "x unified", showlegend: true,
+      legend: { orientation: "h", x: 0, y: 1.12, font: { size: 12, color: css("--text-secondary") } },
+      xaxis: { type: "date", range: [state.from, state.to], gridcolor: css("--grid"), linecolor: css("--border"), showspikes: true, spikemode: "across", spikethickness: 1, spikecolor: css("--text-muted"), spikedash: "solid",
+        rangeslider: { visible: true, thickness: 0.18, bgcolor: css("--surface-2"), bordercolor: css("--border"), borderwidth: 1, range: [DATES[0], DATES[N - 1]] } },
+      yaxis: { type: "log", gridcolor: css("--grid"), tickprefix: "$", fixedrange: true, title: { text: "Growth of $100", font: { size: 11 } } },
+    };
+    const el = $("brush");
+    Plotly.react(el, traces, layout, { ...CFG, displayModeBar: false });
+    updateBrushRebase();
+    if (!el._wired) {
+      el._wired = true;
+      el.on("plotly_relayout", (ev) => {
+        if (brushing) return;
+        let a = ev["xaxis.range[0]"], b = ev["xaxis.range[1]"];
+        if (ev["xaxis.range"]) [a, b] = ev["xaxis.range"];
+        if (ev["xaxis.autorange"]) { a = DATES[0]; b = DATES[N - 1]; }
+        if (a && b) setRange(String(a).slice(0, 10), String(b).slice(0, 10), "custom", false);
+      });
+    }
+  }
+  function updateBrushRebase() {
+    // Re-index the overview so every line starts at $100 on the first brushed day.
+    const el = $("brush"); if (!el.data) return;
+    const [i0] = rangeIdx();
+    const ys = activeCos().map((t) => { const c = C[t].close, base = c[i0]; return c.map((v) => 100 * v / base); });
+    const y0 = Math.min(...ys.map((y) => Math.min(...y.slice(i0, rangeIdx()[1] + 1)))), y1 = Math.max(...ys.map((y) => Math.max(...y.slice(i0, rangeIdx()[1] + 1))));
+    brushing = true;
+    const ticks = []; for (let k = -3; k <= 6; k++) [1, 2, 5].forEach((m) => { const v = m * 10 ** k; if (v >= y0 * 0.9 && v <= y1 * 1.1) ticks.push(v); });
+    Plotly.update(el, { y: ys }, { "xaxis.range": [state.from, state.to], "yaxis.range": [Math.log10(y0 * 0.9), Math.log10(y1 * 1.1)], "yaxis.tickvals": ticks, "yaxis.ticktext": ticks.map((v) => "$" + v.toLocaleString()) }).then(() => { brushing = false; });
+  }
+
+  // ---------- 3D explorer ----------
+  function dailyRows(t) {
+    const [i0, i1] = rangeIdx(), c = C[t];
+    const evIdx = EV.filter((e) => e.i != null && state.cats.has(e.category) && relevant(e, t)).map((e) => e.i).sort((a, b) => a - b);
+    const out = { date: [], company: [], idx: [], price: [], ret: [], vol: [], dd: [], since: [], i: [] };
+    let peak = -Infinity, k = 0, last = null;
+    for (let i = i0; i <= i1; i++) {
+      while (k < evIdx.length && evIdx[k] <= i) last = evIdx[k++];
+      peak = Math.max(peak, c.close[i]);
+      out.date.push(DATES[i]); out.company.push(TICKERS.indexOf(t));
+      out.idx.push(100 * c.close[i] / c.close[i0]); out.price.push(c.close[i]);
+      out.ret.push(c.ret[i] == null ? null : c.ret[i] * 100); out.vol.push(c.vol[i] == null ? null : c.vol[i] * 100);
+      out.dd.push(100 * (c.close[i] / peak - 1)); out.since.push(last == null ? null : i - last); out.i.push(i);
+    }
+    return out;
+  }
+  function eventRow(e, t, i0) {
+    const R = e.r[t], c = C[t];
+    return {
+      date: e.tradeDate, category: CATS.indexOf(e.category), company: TICKERS.indexOf(t),
+      r1: R.r1 == null ? null : R.r1 * 100, r5: R.r5 == null ? null : R.r5 * 100, r20: R.r20 == null ? null : R.r20 * 100,
+      prevol: R.prevol == null ? null : R.prevol * 100, idx: 100 * c.close[e.i] / c.close[i0],
+    };
+  }
+  function axisFor(key, dims, title) {
+    const d = dims[key];
+    const a = {
+      title: { text: title || d.label, font: { size: 12, color: css("--text-secondary") } },
+      gridcolor: css("--grid"), zerolinecolor: css("--text-muted"), linecolor: css("--border"),
+      tickfont: { size: 11, color: css("--text-secondary") }, showbackground: false,
+      showspikes: true, spikecolor: css("--text-muted"), spikethickness: 1,
+    };
+    if (d.type === "date") a.type = "date";
+    if (d.type === "lane") {
+      const names = key === "company" ? TICKERS : CATS;
+      a.tickvals = names.map((_, i) => i); a.ticktext = names; a.range = [-0.5, names.length - 0.5];
+    }
+    if (d.pctAxis) a.ticksuffix = "%";
+    if (d.price) { a.tickprefix = "$"; if (state.log) a.type = "log"; }
+    return a;
+  }
+  // nudge points within a categorical lane so companies don't overlap
+  const laneJitter = (key, t, nCos) => (key === "category" ? (TICKERS.indexOf(t) - (nCos - 1) / 2) * 0.16 : 0);
+
+  let last3d = { pts: [] };
+  function render3d(resetCamera) {
+    const mode = state.mode, dims = DIMS[mode], [kx, ky, kz] = state.axes[mode];
+    const cos = activeCos(), traces = [], corrRows = [];
+    const surface = css("--surface-1");
+    const [i0] = rangeIdx();
+    const evs = eventsInRange();
+    const val = (row, key, t) => { const v = row[key]; return v == null ? null : typeof v === "number" ? v + laneJitter(key, t, cos.length) : v; };
+
+    if (mode === "daily") {
+      cos.forEach((t) => {
+        const r = dailyRows(t), col = coColor(t);
+        const xs = r[kx].map((v) => (kx === "company" ? v : v)), ys = r[ky], zs = r[kz];
+        const ok = (a) => a.map((v) => (v == null ? null : v));
+        traces.push({
+          type: "scatter3d", mode: state.draw === "lines" ? "lines" : "markers", name: t,
+          x: ok(xs), y: ok(ys), z: ok(zs), customdata: r.date.map((d, j) => [fmtDate(d), r.price[j]]),
+          line: { color: col, width: 3.5 }, marker: { color: col, size: 2.5, opacity: 0.75 },
+          hovertemplate: `<b>${t}</b> · %{customdata[0]} · $%{customdata[1]:.2f}<br>${dims[kx].label}: %{x}<br>${dims[ky].label}: %{y}<br>${dims[kz].label}: %{z}<extra></extra>`,
+        });
+        const num = (k) => (dims[k].type === "lane" ? null : dims[k].type === "date" ? r.date.map((d) => +new Date(d)) : r[k]);
+        corrRows.push([t, num(kx) && num(ky) ? pearson(num(kx), num(ky)) : null, num(ky) && num(kz) ? pearson(num(ky), num(kz)) : null, num(kx) && num(kz) ? pearson(num(kx), num(kz)) : null]);
+        if (state.showEv) {
+          const pos = new Map(r.i.map((ii, j) => [ii, j]));
+          CATS.forEach((cat, ci) => {
+            const es = evs.filter((e) => e.category === cat && relevant(e, t) && pos.has(e.i));
+            if (!es.length) return;
+            const js = es.map((e) => pos.get(e.i));
+            traces.push({
+              type: "scatter3d", mode: "markers", name: cat, showlegend: false,
+              x: js.map((j) => r[kx][j]), y: js.map((j) => r[ky][j]), z: js.map((j) => r[kz][j]),
+              customdata: es.map((e) => [e.event, fmtDate(e.date), pct(e.r[t].r5), e.idx]),
+              marker: { symbol: SYM[ci], size: 6, color: col, line: { color: SYM[ci].includes("open") ? col : surface, width: 1.5 } },
+              hovertemplate: `<b>%{customdata[0]}</b><br>%{customdata[1]} · ${t} 5-day %{customdata[2]}<extra>${cat}</extra>`,
+            });
+          });
+        }
+      });
+    } else {
+      cos.forEach((t) => {
+        const col = coColor(t);
+        const rows = evs.filter((e) => relevant(e, t)).map((e) => ({ e, row: eventRow(e, t, i0) }));
+        const numCol = (k) => (dims[k].type === "lane" ? null : rows.map(({ row }) => (k === "date" ? +new Date(row.date) : row[k])));
+        corrRows.push([t, numCol(kx) && numCol(ky) ? pearson(numCol(kx), numCol(ky)) : null, numCol(ky) && numCol(kz) ? pearson(numCol(ky), numCol(kz)) : null, numCol(kx) && numCol(kz) ? pearson(numCol(kx), numCol(kz)) : null]);
+        CATS.forEach((cat, ci) => {
+          const rs = rows.filter(({ e }) => e.category === cat);
+          if (!rs.length) return;
+          traces.push({
+            type: "scatter3d", mode: "markers", name: `${t} · ${cat}`, showlegend: false,
+            x: rs.map(({ row }) => val(row, kx, t)), y: rs.map(({ row }) => val(row, ky, t)), z: rs.map(({ row }) => val(row, kz, t)),
+            customdata: rs.map(({ e }) => [e.event, fmtDate(e.date), pct(e.r[t].r1), pct(e.r[t].r5), pct(e.r[t].r20), e.idx]),
+            marker: { symbol: SYM[ci], size: 6.5, color: col, opacity: 0.95, line: { color: SYM[ci].includes("open") ? col : surface, width: 1.5 } },
+            hovertemplate: `<b>${t} · %{customdata[0]}</b><br>%{customdata[1]} · 1d %{customdata[2]} · 5d %{customdata[3]} · 20d %{customdata[4]}<extra>${cat}</extra>`,
+          });
+        });
+      });
+    }
+    // highlight selected event
+    const sel = EV.find((e) => e.idx === state.selected);
+    if (sel && sel.date >= state.from && sel.date <= state.to) {
+      const hx = [], hy = [], hz = [];
+      cos.forEach((t) => {
+        let row;
+        if (mode === "daily") { const r = dailyRows(t); const j = r.i.indexOf(sel.i); if (j < 0) return; row = Object.fromEntries(Object.keys(r).map((k) => [k, r[k][j]])); }
+        else { if (!relevant(sel, t)) return; row = eventRow(sel, t, i0); }
+        hx.push(val(row, kx, t)); hy.push(val(row, ky, t)); hz.push(val(row, kz, t));
+      });
+      traces.push({ type: "scatter3d", mode: "markers", x: hx, y: hy, z: hz, hoverinfo: "skip", showlegend: false,
+        marker: { size: 13, color: "rgba(0,0,0,0)", line: { color: css("--text-primary"), width: 3 } } });
+    }
+
+    const el = $("plot3d");
+    const layout = {
+      ...baseLayout(), margin: { l: 0, r: 0, t: 0, b: 0 }, showlegend: false,
+      uirevision: resetCamera ? Math.random() : "keep",
+      scene: {
+        xaxis: axisFor(kx, dims), yaxis: axisFor(ky, dims), zaxis: axisFor(kz, dims),
+        aspectmode: "manual", aspectratio: { x: 1.9, y: 1.1, z: 0.9 },
+        camera: { eye: { x: -1.25, y: -1.75, z: 0.65 }, center: { x: 0, y: 0, z: -0.1 } }, bgcolor: "rgba(0,0,0,0)",
+      },
+    };
+    Plotly.react(el, traces, layout, CFG);
+    if (!el._wired) { el._wired = true; el.on("plotly_click", (ev) => { const p = ev.points && ev.points[0]; if (p && p.customdata && p.customdata.length >= 4) select(p.customdata[p.customdata.length - 1]); }); }
+    renderCorrBox(corrRows, dims, kx, ky, kz);
+  }
+
+  function renderCorrBox(rows, dims, kx, ky, kz) {
+    const box = $("corrBox"); box.textContent = "";
+    const short = (k) => dims[k].label.replace(/ \(.*\)$/, "").replace(/, annualized/, "");
+    const tbl = mk("table", "mini"), th = mk("tr");
+    ["", `X↔Y`, `Y↔Z`, `X↔Z`].forEach((h) => th.appendChild(mk("th", null, h)));
+    tbl.appendChild(th);
+    rows.forEach(([t, a, b, c]) => {
+      const tr = mk("tr"), td0 = mk("td"); const key = mk("span", "key"); key.style.background = coColor(t); td0.append(key, document.createTextNode(t)); tr.appendChild(td0);
+      [a, b, c].forEach((v) => tr.appendChild(mk("td", v == null ? "" : v < 0 ? "neg" : "pos", v == null ? "–" : v.toFixed(2))));
+      tbl.appendChild(tr);
+    });
+    box.appendChild(tbl);
+    box.appendChild(mk("p", "note", `X = ${short(kx)} · Y = ${short(ky)} · Z = ${short(kz)}. Category/company axes have no r (–).`));
+  }
+
+  // ---------- event detail ----------
+  function renderDetail() {
+    const box = $("detail"); box.textContent = "";
+    box.appendChild(mk("h3", null, "Event detail"));
+    const e = EV.find((x) => x.idx === state.selected);
+    if (!e) { box.appendChild(mk("p", "hint", "Click an event marker, a dot in the reaction chart, or a table row.")); return; }
+    box.appendChild(mk("div", "ev-date", fmtDate(e.date) + (e.tradeDate && e.tradeDate !== e.date ? ` · first trading day ${fmtDate(e.tradeDate)}` : "")));
+    box.appendChild(mk("div", "ev-name", e.event));
+    box.appendChild(mk("div", "ev-meta", `${GLYPH[CATS.indexOf(e.category)]} ${e.category} · tagged: ${e.rel.join(", ")}`));
+    const tbl = mk("table", "mini"), th = mk("tr");
+    ["", "1-day", "5-day", "20-day"].forEach((h) => th.appendChild(mk("th", null, h))); tbl.appendChild(th);
+    activeCos().forEach((t) => {
+      const R = e.r[t], tr = mk("tr"), td0 = mk("td"), key = mk("span", "key"); key.style.background = coColor(t);
+      td0.append(key, document.createTextNode(t + (e.rel.includes(t) ? "" : " ·"))); tr.appendChild(td0);
+      [R.r1, R.r5, R.r20].forEach((v) => tr.appendChild(mk("td", cls(v), pct(v)))); tbl.appendChild(tr);
+    });
+    box.appendChild(tbl);
+    box.appendChild(mk("p", "ev-desc", e.description));
+    box.appendChild(mk("div", "ev-src", "Source: " + e.source));
+  }
+  function select(idx) { state.selected = state.selected === idx ? null : idx; render3d(); renderDetail(); renderTable(); }
+
+  // ---------- heatmaps ----------
+  function heat(el, labels, M, title) {
+    const neg = css("--neg"), mid = css("--div-mid"), pos = css("--pos");
+    const text = M.map((r) => r.map((v) => (v == null ? "–" : v.toFixed(2))));
+    Plotly.react(el, [{
+      type: "heatmap", x: labels, y: labels, z: M, zmin: -1, zmax: 1, xgap: 2, ygap: 2,
+      colorscale: [[0, neg], [0.5, mid], [1, pos]], text, texttemplate: "%{text}", textfont: { color: css("--text-primary"), size: 13 },
+      colorbar: { thickness: 10, len: 0.9, tickfont: { size: 10, color: css("--text-secondary") }, outlinewidth: 0 },
+      hovertemplate: `%{y} vs %{x}: <b>r = %{z:.2f}</b><extra>${title}</extra>`,
+    }], { ...baseLayout(), margin: { l: 56, r: 10, t: 6, b: 36 }, yaxis: { autorange: "reversed" } }, { ...CFG, displayModeBar: false });
+  }
+  function renderHeatmaps() {
+    const cos = activeCos(), [i0, i1] = rangeIdx();
+    const R = Object.fromEntries(cos.map((t) => [t, C[t].ret.slice(i0 + 1, i1 + 1)]));
+    heat($("hm1"), cos, cos.map((a) => cos.map((b) => pearson(R[a], R[b]))), "daily returns");
+    const evs = eventsInRange();
+    const E = Object.fromEntries(cos.map((t) => [t, evs.map((e) => e.r[t].r5)]));
+    heat($("hm2"), cos, cos.map((a) => cos.map((b) => pearson(E[a], E[b]))), `5-day reactions, ${evs.length} events`);
+  }
+
+  // ---------- strip chart ----------
+  function renderStrip() {
+    const cos = activeCos(), evs = eventsInRange();
+    const cats = CATS.filter((c) => evs.some((e) => e.category === c));
+    const traces = [];
+    cos.forEach((t, k) => {
+      const off = (k - (cos.length - 1) / 2) * 0.16;
+      const pts = evs.filter((e) => relevant(e, t) && e.r[t].r5 != null);
+      traces.push({
+        type: "scatter", mode: "markers", name: t, legendgroup: t,
+        x: pts.map((e) => e.r[t].r5 * 100), y: pts.map((e) => cats.length - 1 - cats.indexOf(e.category) + off),
+        customdata: pts.map((e) => [e.event, fmtDate(e.date), e.idx]),
+        marker: { size: 9, color: coColor(t), line: { color: css("--surface-1"), width: 1.5 } },
+        hovertemplate: `<b>%{x:+.1f}%</b> ${t} · %{customdata[1]}<br>%{customdata[0]}<extra></extra>`,
+      });
+      const mx = [], my = [];
+      cats.forEach((c, ci) => {
+        const v = pts.filter((e) => e.category === c).map((e) => e.r[t].r5 * 100).sort((a, b) => a - b);
+        if (!v.length) return; mx.push(v.length % 2 ? v[(v.length - 1) / 2] : (v[v.length / 2 - 1] + v[v.length / 2]) / 2); my.push(cats.length - 1 - ci + off);
+      });
+      traces.push({ type: "scatter", mode: "markers", legendgroup: t, showlegend: false, x: mx, y: my,
+        marker: { symbol: "line-ns-open", size: 16, color: coColor(t), line: { width: 2.5, color: coColor(t) } },
+        hovertemplate: `${t} median <b>%{x:+.1f}%</b><extra></extra>` });
+    });
+    const layout = {
+      ...baseLayout(), margin: { l: 10, r: 16, t: 28, b: 44 }, hovermode: "closest",
+      legend: { orientation: "h", x: 0, y: 1.1, font: { size: 12 } },
+      xaxis: { title: { text: "5-day reaction (%)", font: { size: 12 } }, ticksuffix: "%", gridcolor: css("--grid"), zeroline: true, zerolinecolor: css("--text-muted"), zerolinewidth: 1 },
+      yaxis: { automargin: true, tickvals: cats.map((_, i) => cats.length - 1 - i), ticktext: cats, gridcolor: css("--grid"), range: [-0.6, cats.length - 0.4], fixedrange: true },
+    };
+    const el = $("strip");
+    Plotly.react(el, traces, layout, { ...CFG, displayModeBar: false });
+    if (!el._wired) { el._wired = true; el.on("plotly_click", (ev) => { const p = ev.points && ev.points[0]; if (p && p.customdata) select(p.customdata[2]); }); }
+  }
+
+  // ---------- table ----------
+  function renderTable() {
+    const cos = activeCos(), evs = eventsInRange();
+    const head = document.querySelector("#tbl thead tr"); head.textContent = "";
+    const cols = [["date", "Date", ""], ["event", "Event", ""], ["category", "Category", "col-cat"], ["rel", "Tagged", "col-rel"], ...cos.map((t) => [t, t + " 5d", "num"])];
+    cols.forEach(([k, label, c]) => {
+      const th = mk("th", c, label + (state.sortK === k ? (state.sortDir > 0 ? " ▲" : " ▼") : ""));
+      th.onclick = () => { if (state.sortK === k) state.sortDir *= -1; else { state.sortK = k; state.sortDir = TICKERS.includes(k) ? -1 : 1; } renderTable(); };
+      head.appendChild(th);
+    });
+    const keyOf = (e) => (TICKERS.includes(state.sortK) ? e.r[state.sortK].r5 : state.sortK === "rel" ? e.rel.join() : e[state.sortK]);
+    const rows = [...evs].sort((a, b) => { const x = keyOf(a), y = keyOf(b); if (x == null) return 1; if (y == null) return -1; return (x < y ? -1 : x > y ? 1 : 0) * state.sortDir; });
+    const tb = document.querySelector("#tbl tbody"); tb.textContent = "";
+    rows.forEach((e) => {
+      const tr = mk("tr", e.idx === state.selected ? "sel" : null); tr.tabIndex = 0;
+      tr.onclick = () => select(e.idx); tr.onkeydown = (ev) => { if (ev.key === "Enter") select(e.idx); };
+      tr.appendChild(mk("td", null, fmtDate(e.date)));
+      tr.appendChild(mk("td", null, e.event));
+      tr.appendChild(mk("td", "col-cat", `${GLYPH[CATS.indexOf(e.category)]} ${e.category}`));
+      const rel = mk("td", "col-rel"); e.rel.forEach((t) => rel.appendChild(mk("span", "tag", t))); tr.appendChild(rel);
+      cos.forEach((t) => { const v = e.r[t].r5; const td = mk("td", "num " + cls(v), pct(v)); if (!e.rel.includes(t)) td.style.opacity = 0.55; tr.appendChild(td); });
+      tb.appendChild(tr);
+    });
+  }
+
+  function renderAll(resetCam) {
+    if (resetCam && $("brush").data) renderBrush();
+    render3d(false); renderHeatmaps(); renderStrip(); renderTable(); renderDetail();
+    $("gen").textContent = `Data bundled ${D.generated}; prices through ${fmtDate(DATES[N - 1])}.`;
+  }
+
+  // ---------- boot ----------
+  syncChips(); fillAxisSelects();
+  $("from").value = state.from; $("to").value = state.to;
+  [...presetBox.children].forEach((b) => b.setAttribute("aria-pressed", b.dataset.v === "all"));
+  renderBrush(); renderAll(false); render3d(true);
+})();
+</script>
+</body>
+</html>

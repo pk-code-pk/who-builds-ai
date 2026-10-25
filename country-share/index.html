@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Where Notable AI Models Come From</title>
+<link rel="stylesheet" href="country_share_chart.css" />
+<style>
+  body { margin: 0; background: var(--page, #f4f3ef); color: var(--ink); font: 15px/1.5 "Helvetica Neue", Helvetica, Arial, sans-serif; }
+  main { max-width: 980px; margin: 0 auto; padding: 1.6rem 16px 2.5rem; }
+  .kicker { margin: 0; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-2); font-weight: 700; }
+  h1 { margin: .25rem 0 .4rem; font-size: clamp(1.4rem, 3.2vw, 2rem); line-height: 1.2; }
+  .dek { margin: 0 0 1rem; color: var(--ink-2); max-width: 46em; }
+  .card { background: var(--surface); border: 1px solid var(--rule); border-radius: 12px; padding: 1rem 1.1rem .8rem; }
+  .howto { margin: .6rem 0 0; font-size: 13px; color: var(--ink-2); }
+  .note { font-size: 13px; color: var(--ink-2); max-width: 52em; }
+  details { margin-top: 1rem; font-size: 13px; }
+  summary { cursor: pointer; font-weight: 700; }
+  table.data { border-collapse: collapse; margin-top: .5rem; font-variant-numeric: tabular-nums; }
+  table.data th, table.data td { padding: .2rem .7rem; border-bottom: 1px solid var(--rule); text-align: right; }
+  table.data th:first-child, table.data td:first-child { text-align: left; }
+  a { color: #1c5cab; }
+  [data-theme="dark"] body { --page: #0b1530; }
+  [data-theme="dark"] a { color: #9cc4ff; }
+</style>
+</head>
+<body>
+<main>
+  <p class="kicker">Who builds AI models? · Country view</p>
+  <h1 id="headline">China's share of notable AI models kept growing after the US cut off its best chips</h1>
+  <p class="dek" id="dek"></p>
+  <div class="card">
+    <div id="chart"></div>
+    <p class="howto"><b>Try it:</b> hover the chart to see each year's shares and counts. Hover the small triangles on the time axis
+      for each US export-control event and Nvidia's stock move after it. Click a name to highlight it, or switch to the stacked view.</p>
+  </div>
+  <p class="note" id="rule"></p>
+  <details>
+    <summary>Show the numbers as a table</summary>
+    <table class="data" id="table"></table>
+  </details>
+  <p class="note" id="source"></p>
+</main>
+<script>if (new URLSearchParams(location.search).get("theme") === "dark") document.documentElement.dataset.theme = "dark";</script>
+<script src="../prototype-who-builds/d3.v7.min.js"></script>
+<script src="data/country_share.js"></script>
+<script src="country_share_chart.js"></script>
+<script>
+  const D = window.COUNTRY_SHARE, pct = d3.format(".0%");
+  const [w0, w1, w2] = D.windows;
+  document.getElementById("dek").textContent =
+    `China built ${pct(w0.China / w0.total)} of notable AI models in the two years before the October 2022 US export controls on AI chips ` +
+    `(${w0.China} of ${w0.total}), ${pct(w1.China / w1.total)} in the two years after (${w1.China} of ${w1.total}), ` +
+    `and ${pct(w2.China / w2.total)} in the two years after that (${w2.China} of ${w2.total}).`;
+  document.getElementById("rule").innerHTML =
+    `<b>How countries are counted.</b> Each model counts once. It goes to "US" if at least one of the organizations that built it is American and none is Chinese, ` +
+    `to "China" if at least one is Chinese and none is American, to "US + China together" if both, and to "Rest of world" if neither. ` +
+    `Hong Kong counts as China. So the four shares in a year always add up to 100%. This counts models, not how big or good they are.`;
+  document.getElementById("source").innerHTML =
+    `Source: ${D.source}. Models published ${D.years[0].year} to ${D.lastDate}. Export-control dates and Nvidia's 5-day stock reactions: ` +
+    `our team's event list and Nvidia prices (see the <a href="../chip-policy.html">Chip Policy Shock Map</a>).`;
+  const t = d3.select("#table");
+  t.append("tr").html("<th>Year</th><th>Models</th><th>US</th><th>US + China</th><th>China</th><th>Rest of world</th>");
+  t.selectAll("tr.r").data(D.years).join("tr").attr("class", "r").html(d =>
+    `<td>${d.year}${d.partial ? "*" : ""}</td><td>${d.total}</td>` +
+    ["US", "US + China", "China", "Other"].map(g => `<td>${d[g]} (${pct(d[g] / d.total)})</td>`).join(""));
+  countryShareChart(document.getElementById("chart"), D);
+</script>
+</body>
+</html>

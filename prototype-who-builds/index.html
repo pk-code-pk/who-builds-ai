@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Who Builds AI Models?</title>
+<script src="d3.v7.min.js"></script>
+<script src="data/who_builds.js"></script>
+<style>
+  :root {
+    --bg: #f4f5f7; --panel: #fff; --ink: #1d1f23; --muted: #5b6070; --line: #e1e3e8;
+    /* same colors as the story page: sectors and countries each keep one color everywhere */
+    --acad: #008300; --collab: #1baf7a; --ind: #eda100; --other: #c4c3be;
+    --us: #2a78d6; --china: #e34948; --oth: #8a8984; --accent: #33322f;
+    --trace: #111; --bubble-text: #fff; --diag: #999; --tip-bg: #1d1f23; --tip-ink: #fff; --brush: #33322f;
+    --btn-bg: #fff; --btn-line: #bbb; --hint: #1f5fa8; --axis-line: #c9ccd3;
+  }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 14px "Helvetica Neue", Helvetica, Arial, sans-serif; }
+  main { max-width: 1060px; margin: 0 auto; padding: 1.4rem 1rem 2rem; }
+  h1 { margin: 0; font-size: 1.6rem; }
+  .sub { margin: .3rem 0 1rem; color: var(--muted); }
+  .howto { display: flex; gap: .7rem; margin: 0 0 1rem; padding: 0; list-style: none; counter-reset: s; }
+  .howto li { flex: 1; counter-increment: s; position: relative; background: #e6f0fb; border: 1px solid #b9d3f2;
+    border-radius: 8px; padding: .55rem .7rem .55rem 2.3rem; color: #163d6b; }
+  .howto li::before { content: counter(s); position: absolute; left: .65rem; top: .55rem; width: 1.2rem; height: 1.2rem;
+    border-radius: 50%; background: var(--accent); color: #fff; font-size: 12px; font-weight: 700; text-align: center; line-height: 1.2rem; }
+  .status { display: flex; align-items: center; gap: 1rem; margin-bottom: .8rem; flex-wrap: wrap; }
+  .status b { font-size: 15px; }
+  button { font: inherit; color: inherit; padding: .3rem .8rem; border: 1px solid var(--btn-line); border-radius: 6px; background: var(--btn-bg); cursor: pointer; }
+  button:disabled { opacity: .45; cursor: default; }
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: .8rem 1rem .7rem; margin-bottom: 1rem; }
+  .panel h2 { margin: 0 0 .2rem; font-size: 15px; }
+  .hint { margin: 0 0 .3rem; color: var(--hint); font-size: 13px; }
+  .row { display: flex; gap: 1rem; flex-wrap: wrap; }
+  .row .panel { flex: 1; min-width: 300px; }
+  @media (max-width: 520px) { .row .panel { min-width: 0; flex-basis: 100%; } .status { gap: .5rem; } }
+  .legend { display: flex; gap: .9rem; flex-wrap: wrap; font-size: 12px; margin: .2rem 0 .3rem; }
+  .legend span { display: inline-flex; align-items: center; gap: .3rem; cursor: default; }
+  .legend i { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+  .legend .sector { cursor: pointer; }
+  .axis text { font-size: 11px; fill: var(--muted); }
+  .axis path, .axis line { stroke: var(--axis-line); }
+  svg text:not([fill]) { fill: var(--ink); }
+  .bubble { cursor: pointer; stroke: var(--panel); stroke-width: 1; }
+  .bubble.dim { opacity: .18; }
+  .bubble.on { stroke: var(--trace); stroke-width: 2.5; }
+  .note { color: var(--muted); font-size: 12px; margin: .4rem 0 0; }
+  .tip { position: fixed; pointer-events: none; background: var(--tip-bg); color: var(--tip-ink); font-size: 12px; box-shadow: 0 4px 14px rgba(0,0,0,.25); padding: .35rem .55rem; border-radius: 6px; opacity: 0; }
+  .brush .selection { fill: var(--brush); fill-opacity: .1; stroke: var(--brush); }
+  .toggle { font-size: 12px; color: var(--muted); }
+  /* embedded in the story page (?embed=1): no page title, transparent background */
+  body.embed { background: transparent; }
+  body.embed main { padding: 0; max-width: none; }
+  body.embed h1, body.embed .sub, body.embed .howto { display: none; }
+  body.embed .panel { margin-bottom: .6rem; }
+  /* dark theme for the story page (?theme=dark): same colors, stepped lighter for a navy background */
+  body.dark {
+    --bg: #0b1530; --panel: #15234a; --ink: #e8ecf6; --muted: #aab5cf; --line: #2b3b67;
+    --acad: #1f9d3a; --collab: #2ec4a6; --ind: #e8a317; --other: #5f6880;
+    --us: #3987e5; --china: #e66767; --oth: #5f6880; --accent: #e8ecf6;
+    --trace: #ffffff; --bubble-text: #0b1530; --diag: #6b7899; --tip-bg: #ffffff; --tip-ink: #0b1530; --brush: #ffffff;
+    --btn-bg: transparent; --btn-line: #3a4b78; --hint: #9cc4ff; --axis-line: #3a4b78; --faded: #2c3b66;
+    font-family: "Source Sans 3", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  }
+  body.dark input[type="checkbox"] { accent-color: #7fb3f5; }
+  body.dark #timeline rect { stroke: var(--panel); stroke-width: 1; }
+  body.only-timeline .row, body.only-labs #timelinePanel, body.embed #rules { display: none; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Who builds notable AI models, and how few of them are there?</h1>
+  <p class="sub">Every notable AI model from 2012 on, from Epoch AI's dataset (one row per model). <span id="partial"></span></p>
+  <ol class="howto">
+    <li><b>Drag</b> across years on the timeline to pick a range</li>
+    <li><b>Hover</b> a lab bubble to see its models on the timeline</li>
+    <li><b>Click</b> a sector in the legend to see which labs it includes</li>
+  </ol>
+  <div class="status">
+    <b id="label"></b>
+    <button id="clear">Clear selection</button>
+  </div>
+
+  <section class="panel" id="timelinePanel">
+    <h2>Notable models per year, by sector</h2>
+    <p class="hint">Drag across years to filter the two views below</p>
+    <div class="legend" id="sectorLegend"></div>
+    <span class="toggle"><label><input type="checkbox" id="share" /> show as share of each year</label></span>
+    <svg id="timeline"></svg>
+  </section>
+
+  <div class="row">
+    <section class="panel">
+      <h2>Labs in the selected years</h2>
+      <p class="hint">Circle area = notable models the lab shipped. Color = the lab's home country. Hover one to trace it above.</p>
+      <div class="legend" id="countryLegend"></div>
+      <svg id="bubbles"></svg>
+    </section>
+    <section class="panel">
+      <h2>How concentrated is it?</h2>
+      <p class="hint">Labs ranked by output, against their running share of all lab credits</p>
+      <svg id="curve"></svg>
+      <p class="note" id="curveNote"></p>
+    </section>
+  </div>
+  <p class="note" id="rules">Counting rules: academia + industry collaborations are their own sector. A model built by several labs counts once for each lab in the lab views. One company's research units count as one lab: Google, Google Brain, Google Research and DeepMind are Google, Facebook AI Research and Meta AI are Meta, and Microsoft Research (including its Asia lab) is Microsoft. A lab's color is the country it is listed under on most of its models. Source: Epoch AI, Notable AI Models.</p>
+</main>
+<div class="tip" id="tip"></div>
+<script>
+const D = window.WHO_BUILDS, MODELS = D.models;
+const SECTORS = ["Academia only", "Academia + Industry", "Industry only", "Other"];
+const SCOL = { "Academia only": "var(--acad)", "Academia + Industry": "var(--collab)", "Industry only": "var(--ind)", "Other": "var(--other)" };
+const CCOL = { US: "var(--us)", China: "var(--china)", Other: "var(--oth)" };
+const CNAME = { US: "US", China: "China", Other: "Rest of world" };
+const LAB_COUNTRY = D.labCountry;   // one fixed country per lab, from scripts/build_who_builds_data.py
+const YEARS = d3.range(2012, 2027);
+const fmt = d3.format(",");
+const tip = d3.select("#tip");
+document.getElementById("partial").textContent = `2026 is a partial year (data through ${D.lastDate}).`;
+
+// shared state: one selection for years, one for the hovered lab, one for the clicked sector
+const state = { range: [2024, 2026], lab: null, sector: null, share: false };
+
+function inRange(m) { return m.year >= state.range[0] && m.year <= state.range[1]; }
+function labCounts(models) {
+  const c = new Map();
+  for (const m of models) for (const o of m.orgs) {
+    if (!c.has(o)) c.set(o, { lab: o, n: 0, country: LAB_COUNTRY[o] || "Other", sectors: new Set() });
+    const e = c.get(o); e.n++; e.sectors.add(m.sector);
+  }
+  return [...c.values()].sort((a, b) => b.n - a.n);
+}
+
+// ---------- timeline (sketch 7) ----------
+const TW = 1010, TH = 250, tm = { t: 10, r: 10, b: 28, l: 44 };
+const tl = d3.select("#timeline").attr("width", TW).attr("height", TH).attr("viewBox", `0 0 ${TW} ${TH}`).style("max-width", "100%");
+const tx = d3.scaleBand().domain(YEARS).range([tm.l, TW - tm.r]).padding(0.12);
+const ty = d3.scaleLinear().range([TH - tm.b, tm.t]);
+const gBars = tl.append("g"), gLab = tl.append("g");
+const gx = tl.append("g").attr("class", "axis").attr("transform", `translate(0,${TH - tm.b})`);
+const gy = tl.append("g").attr("class", "axis").attr("transform", `translate(${tm.l},0)`);
+gx.call(d3.axisBottom(tx).tickFormat(y => y === 2026 ? "2026*" : y));
+
+const perYear = YEARS.map(y => {
+  const ms = MODELS.filter(m => m.year === y), row = { year: y, total: ms.length };
+  for (const s of SECTORS) row[s] = ms.filter(m => m.sector === s).length;
+  return row;
+});
+
+function drawTimeline() {
+  const key = r => state.share ? (r.total || 1) : 1;
+  const stack = d3.stack().keys(SECTORS).value((r, s) => r[s] / key(r))(perYear);  // academia first = bottom
+  ty.domain([0, state.share ? 1 : d3.max(perYear, r => r.total)]).nice();
+  gy.transition().duration(300).call(d3.axisLeft(ty).ticks(5).tickFormat(state.share ? d3.format(".0%") : d3.format("d")));
+  // on the dark theme, fading by opacity mixes the colors with navy into mud, so other sectors turn plain gray instead
+  const dark = document.body.classList.contains("dark"), faded = d => state.sector && state.sector !== d.key;
+  gBars.selectAll("g.layer").data(stack, d => d.key).join("g").attr("class", "layer")
+    .attr("fill", d => dark && faded(d) ? "var(--faded)" : SCOL[d.key])
+    .attr("opacity", d => !dark && faded(d) ? 0.25 : 1)
+    .selectAll("rect").data(d => d.map(v => Object.assign(v, { key: d.key }))).join("rect")
+    .attr("x", v => tx(v.data.year)).attr("width", tx.bandwidth())
+    .attr("y", v => ty(v[1])).attr("height", v => Math.max(0, ty(v[0]) - ty(v[1])))
+    .on("mousemove", (e, v) => showTip(e, `${v.data.year}: ${v.data[v.key]} ${v.key.toLowerCase()} of ${v.data.total} models`))
+    .on("mouseleave", hideTip);
+  drawLabTrace();
+}
+function drawLabTrace() {
+  const pts = state.lab ? YEARS.map(y => ({ y, n: MODELS.filter(m => m.year === y && m.orgs.includes(state.lab)).length,
+    t: perYear.find(r => r.year === y).total })) : [];
+  const yv = p => state.share ? (p.t ? p.n / p.t : 0) : p.n;
+  gLab.selectAll("path").data(state.lab ? [pts] : []).join("path").attr("fill", "none").attr("stroke", "var(--trace)").attr("stroke-width", 2.5)
+    .attr("d", d3.line().x(p => tx(p.y) + tx.bandwidth() / 2).y(p => ty(yv(p))));
+  gLab.selectAll("circle").data(pts).join("circle").attr("r", 3.5).attr("fill", "var(--trace)")
+    .attr("cx", p => tx(p.y) + tx.bandwidth() / 2).attr("cy", p => ty(yv(p)));
+  gLab.selectAll("text").data(state.lab ? [state.lab] : []).join("text").attr("x", tm.l + 8).attr("y", tm.t + 12)
+    .attr("font-size", 12).attr("font-weight", 700).text(d => `${d}'s models per year`);
+}
+// brush over year bands, snapped to whole years
+const brush = d3.brushX().extent([[tm.l, tm.t], [TW - tm.r, TH - tm.b]]).on("end", brushed);
+const gBrush = tl.append("g").attr("class", "brush").call(brush);
+gBrush.select(".overlay").style("cursor", "crosshair");
+function pxToYear(px) { const i = Math.floor((px - tm.l) / tx.step()); return YEARS[Math.max(0, Math.min(YEARS.length - 1, i))]; }
+function brushed(e) {
+  if (!e.sourceEvent) return;               // ignore our own snapping move below
+  if (!e.selection) { state.range = [2012, 2026]; } else {
+    state.range = [pxToYear(e.selection[0]), pxToYear(e.selection[1] - 1)];
+  }
+  snapBrush(); update();
+}
+function snapBrush() {
+  const full = state.range[0] === 2012 && state.range[1] === 2026;
+  gBrush.call(brush.move, full ? null : [tx(state.range[0]), tx(state.range[1]) + tx.bandwidth()]);
+}
+
+// ---------- bubbles (sketch 10a) ----------
+const BW = 480, BH = 400;
+const bub = d3.select("#bubbles").attr("width", BW).attr("height", BH).attr("viewBox", `0 0 ${BW} ${BH}`).style("max-width", "100%");
+function drawBubbles(labs) {
+  const root = d3.pack().size([BW, BH]).padding(2)(d3.hierarchy({ children: labs }).sum(d => d.n));
+  const nodes = root.leaves();
+  const g = bub.selectAll("g.node").data(nodes, d => d.data.lab).join(
+    en => { const g = en.append("g").attr("class", "node"); g.append("circle").attr("class", "bubble"); g.append("text"); return g; });
+  g.attr("transform", d => `translate(${d.x},${d.y})`);
+  g.select("circle").attr("r", d => d.r).attr("fill", d => CCOL[d.data.country])
+    .classed("dim", d => state.sector && !d.data.sectors.has(state.sector))
+    .classed("on", d => d.data.lab === state.lab)
+    .on("mouseenter", (e, d) => { state.lab = d.data.lab; drawLabTrace(); g.select("circle").classed("on", x => x.data.lab === state.lab); })
+    .on("mousemove", (e, d) => showTip(e, `${d.data.lab} (${CNAME[d.data.country]}): ${d.data.n} models in ${state.range[0]}–${state.range[1]}`))
+    .on("mouseleave", () => { state.lab = null; drawLabTrace(); g.select("circle").classed("on", false); hideTip(); });
+  g.select("text").attr("text-anchor", "middle").attr("dy", "0.35em").attr("font-size", d => Math.min(13, d.r / 2.8))
+    .attr("fill", d => d.data.country === "Other" ? "#fff" : "var(--bubble-text)").attr("pointer-events", "none")
+    .text(d => { const fs = Math.min(13, d.r / 2.8), name = d.data.lab.replace(/ \(.*\)$/, "");
+      return d.r > 20 && name.length * fs * 0.56 < 2 * d.r - 6 ? name : ""; });
+}
+
+// ---------- concentration curve (sketch 10b) ----------
+const CW = 480, CH = 400, cm = { t: 14, r: 16, b: 40, l: 58 };  // room for the rotated axis title next to the % labels
+const cv = d3.select("#curve").attr("width", CW).attr("height", CH).attr("viewBox", `0 0 ${CW} ${CH}`).style("max-width", "100%");
+const cx = d3.scaleLinear().range([cm.l, CW - cm.r]), cy = d3.scaleLinear().domain([0, 1]).range([CH - cm.b, cm.t]);
+const cgx = cv.append("g").attr("class", "axis").attr("transform", `translate(0,${CH - cm.b})`);
+cv.append("g").attr("class", "axis").attr("transform", `translate(${cm.l},0)`).call(d3.axisLeft(cy).ticks(5).tickFormat(d3.format(".0%")));
+cv.append("text").attr("x", (cm.l + CW - cm.r) / 2).attr("y", CH - 6).attr("text-anchor", "middle").attr("font-size", 12).text("labs, ranked by number of models");
+cv.append("text").attr("transform", "rotate(-90)").attr("x", -(CH - cm.b + cm.t) / 2).attr("y", 13).attr("text-anchor", "middle").attr("font-size", 12).text("running share of all lab credits");
+const diag = cv.append("line").attr("stroke", "var(--diag)").attr("stroke-dasharray", "4 4");
+const diagLbl = cv.append("text").attr("font-size", 11).attr("fill", "var(--muted)").text("perfectly even field");
+const curvePath = cv.append("path").attr("fill", "none").attr("stroke", "var(--accent)").attr("stroke-width", 2.5);
+const gMarks = cv.append("g");
+function drawCurve(labs) {
+  const total = d3.sum(labs, d => d.n); let run = 0;
+  const pts = [{ k: 0, s: 0 }].concat(labs.map((d, i) => ({ k: i + 1, s: (run += d.n) / total })));
+  cx.domain([0, labs.length]); cgx.call(d3.axisBottom(cx).ticks(6).tickFormat(d3.format("d")));
+  diag.attr("x1", cx(0)).attr("y1", cy(0)).attr("x2", cx(labs.length)).attr("y2", cy(1));
+  diagLbl.attr("x", cx(labs.length * 0.55)).attr("y", cy(0.48));
+  curvePath.attr("d", d3.line().x(p => cx(p.k)).y(p => cy(p.s))(pts));
+  const marks = [5, 10, 20].filter(k => k < labs.length).map(k => pts[k]);
+  const g = gMarks.selectAll("g").data(marks).join(en => { const g = en.append("g"); g.append("circle").attr("r", 4.5); g.append("text"); return g; });
+  g.select("circle").attr("cx", p => cx(p.k)).attr("cy", p => cy(p.s)).attr("fill", "var(--panel)").attr("stroke", "var(--accent)").attr("stroke-width", 2);
+  g.select("text").attr("x", p => cx(p.k) + 8).attr("y", p => cy(p.s) + 14).attr("font-size", 12)
+    .text(p => `top ${p.k} = ${d3.format(".0%")(p.s)}`);
+  const top5 = pts[Math.min(5, labs.length)].s;
+  document.getElementById("curveNote").textContent =
+    `${labs.length} labs shipped models in these years. The top 5 labs account for ${d3.format(".0%")(top5)} of lab credits (a model built by 2 labs gives each of them a credit).`;
+}
+
+// ---------- legends, tooltip, update ----------
+const sl = d3.select("#sectorLegend").selectAll("span").data(SECTORS).join("span").attr("class", "sector")
+  .html(s => `<i style="background:${SCOL[s]}"></i>${s}`)
+  .on("click", (e, s) => { state.sector = state.sector === s ? null : s; update(); });
+d3.select("#countryLegend").selectAll("span").data(Object.keys(CCOL)).join("span").html(c => `<i style="background:${CCOL[c]};border-radius:50%"></i>${CNAME[c]}`);
+function showTip(e, t) { tip.style("opacity", 1).style("left", e.clientX + 12 + "px").style("top", e.clientY + 12 + "px").text(t); }
+function hideTip() { tip.style("opacity", 0); }
+d3.select("#share").on("change", function () { state.share = this.checked; drawTimeline(); });
+d3.select("#clear").on("click", () => { state.range = [2012, 2026]; state.sector = null; snapBrush(); update(); });
+
+function update() {
+  const sel = MODELS.filter(inRange), labs = labCounts(sel);
+  const full = state.range[0] === 2012 && state.range[1] === 2026;
+  document.getElementById("label").textContent =
+    `Showing ${full ? "all years, 2012–2026" : state.range[0] === state.range[1] ? state.range[0] : state.range[0] + "–" + state.range[1]}: ${fmt(sel.length)} models from ${labs.length} labs` +
+    (state.sector ? ` (highlighting ${state.sector.toLowerCase()})` : "");
+  document.getElementById("clear").disabled = full && !state.sector;
+  sl.style("font-weight", s => s === state.sector ? 700 : 400);
+  drawTimeline(); drawBubbles(labs); drawCurve(labs);
+}
+// ---------- embedding (story page) ----------
+// URL options: ?embed=1&panels=timeline|labs&range=2023-2025&share=1&sector=Academia%20only&id=frame4&theme=dark
+// The story page can also send {type: "who-builds:set", range, sector, share} with postMessage,
+// and this page reports its height back so the iframe can fit it (works from file:// too).
+const params = new URLSearchParams(location.search);
+function applySettings(o) {
+  if (o.range) { const [a, b] = o.range.map(Number); if (a >= 2012 && b <= 2026 && a <= b) state.range = [a, b]; }
+  if ("sector" in o) state.sector = SECTORS.includes(o.sector) ? o.sector : null;
+  if ("share" in o) { state.share = !!o.share; document.getElementById("share").checked = state.share; }
+}
+if (params.get("embed") === "1") document.body.classList.add("embed");
+if (params.get("theme") === "dark") {
+  document.body.classList.add("dark");
+  const font = document.createElement("link");
+  font.rel = "stylesheet";
+  font.href = "https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap";
+  document.head.appendChild(font);
+}
+if (params.get("panels") === "timeline") document.body.classList.add("only-timeline");
+if (params.get("panels") === "labs") document.body.classList.add("only-labs");
+applySettings({
+  ...(params.get("range") ? { range: params.get("range").split("-") } : {}),
+  ...(params.has("sector") ? { sector: params.get("sector") } : {}),
+  ...(params.has("share") ? { share: params.get("share") === "1" } : {}),
+});
+window.addEventListener("message", e => {
+  if (!e.data || e.data.type !== "who-builds:set") return;
+  applySettings(e.data); update(); snapBrush();
+});
+if (window.parent !== window) {
+  const report = () => window.parent.postMessage({ type: "who-builds:height", id: params.get("id"),
+    height: document.querySelector("main").getBoundingClientRect().height + 8 }, "*");
+  new ResizeObserver(report).observe(document.querySelector("main"));
+}
+
+update(); snapBrush();
+</script>
+</body>
+</html>

@@ -1,0 +1,165 @@
+/* chip.html: the 3D chip landing page. Same navy theme, fonts and colors as story/story.css. */
+:root {
+  --navy: #0b1530;
+  --navy-2: #0e1a3a;
+  --card: #15234a;
+  --navy-line: #2b3b67;
+  --ink: #e8ecf6; --ink-2: #aab5cf; --ink-3: #8d98b6;
+  --f-display: "Fraunces", Georgia, "Times New Roman", serif;
+  --f-body: "Source Sans 3", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  /* chart palette (dark) */
+  --c-us: #3987e5; --c-china: #e66767; --c-joint: #b6a8ff; --c-acad: #1f9d3a; --c-mix: #2ec4a6; --c-ind: #e8a317; --c-other: #5f6880;
+  /* text versions, at least 4.5:1 on navy */
+  --t-us: #7fb3f5; --t-china: #ff9090; --t-acad: #5bd178; --t-ind: #f2b84b; --t-joint: #c9beff;
+}
+* { box-sizing: border-box; }
+html { background: var(--navy); }
+body { margin: 0; color: var(--ink); font: 18px/1.6 var(--f-body); -webkit-font-smoothing: antialiased; background: var(--navy); }
+a { color: #9cc4ff; }
+b { color: #fff; font-weight: 700; }
+.skip { position: absolute; left: -999px; }
+.skip:focus { left: 16px; top: 8px; z-index: 50; background: #fff; color: var(--navy); padding: .4rem .7rem; }
+.c-us { color: var(--t-us); font-weight: 700; }
+.c-china { color: var(--t-china); font-weight: 700; }
+.c-acad { color: var(--t-acad); font-weight: 700; }
+
+/* ---------- hero: text left, chip right ---------- */
+.hero { position: relative; display: grid; grid-template-columns: minmax(0, 30rem) minmax(0, 1fr); gap: 1rem;
+  max-width: 88rem; margin: 0 auto; min-height: 100vh; min-height: 100svh; padding: 0 32px; }
+.intro { align-self: center; padding: 48px 0; }
+.hub { margin: 0 0 1.4rem; font-size: .95rem; }
+.hub a { text-decoration: none; font-weight: 600; }
+.hub a:hover { text-decoration: underline; }
+.kicker { margin: 0; font: 700 12px/1.3 var(--f-body); letter-spacing: .14em; text-transform: uppercase; color: var(--ink-2); }
+h1 { font: 800 clamp(2.6rem, 5.2vw, 4.6rem)/1 var(--f-display); letter-spacing: -.015em; margin: .45rem 0 1.1rem; color: #fff; }
+.lede { margin: 0 0 1.6rem; font-size: 1.18rem; color: var(--ink); }
+.cta-row { margin: 0 0 1.4rem; }
+.cta { display: inline-flex; align-items: center; gap: .5rem; padding: .78rem 1.35rem; border-radius: 999px;
+  background: #fff; color: var(--navy); font-weight: 700; font-size: 1.05rem; text-decoration: none;
+  box-shadow: 0 0 0 0 rgba(127, 179, 245, .0), 0 10px 26px rgba(2, 6, 20, .45); transition: box-shadow .2s, transform .2s; }
+.cta:hover { box-shadow: 0 0 0 5px rgba(127, 179, 245, .22), 0 10px 26px rgba(2, 6, 20, .45); transform: translateY(-1px); }
+.cta:focus-visible { outline: 3px solid #7fb3f5; outline-offset: 3px; }
+.hint { margin: 0; font-size: .95rem; color: var(--ink-2); max-width: 26rem; }
+.hint-touch { display: none; }
+
+/* ---------- the 3D stage ---------- */
+.stage { position: relative; min-height: 560px; height: 100vh; height: 100svh; max-height: 980px; align-self: center; }
+#chipCanvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: pan-y; cursor: grab;
+  /* feather the edges into the page so the canvas has no visible box */
+  -webkit-mask-image: radial-gradient(ellipse 72% 66% at 50% 50%, #000 62%, transparent 100%);
+          mask-image: radial-gradient(ellipse 72% 66% at 50% 50%, #000 62%, transparent 100%); }
+#chipCanvas.dragging { cursor: grabbing; }
+#chipCanvas.over { cursor: pointer; }
+.loading, .nogl { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); margin: 0; color: var(--ink-2);
+  font-size: .95rem; text-align: center; max-width: 22rem; }
+.nogl { color: var(--ink); }
+
+/* numbered markers that ride on the chip */
+.pins { position: absolute; inset: 0; pointer-events: none; }
+.pin { position: absolute; left: 0; top: 0; width: 24px; height: 24px; margin: -12px 0 0 -12px; border-radius: 50%;
+  display: grid; place-items: center; font: 700 12px/1 var(--f-body); color: #fff;
+  background: rgba(11, 21, 48, .72); border: 1.5px solid var(--pc, #7fb3f5);
+  box-shadow: 0 0 0 4px rgba(11, 21, 48, .35); transition: transform .2s, background .2s, opacity .3s; opacity: 0; }
+.pins.on .pin { opacity: 1; }
+.pin.hot { transform: scale(1.18); background: var(--pc); color: var(--navy); }
+
+/* glass card */
+.card { position: absolute; left: 0; top: 0; z-index: 5; width: min(19rem, calc(100% - 24px)); padding: .85rem 1rem .9rem;
+  border-radius: 14px; pointer-events: none;
+  background: rgba(21, 35, 74, .58); -webkit-backdrop-filter: blur(14px) saturate(140%); backdrop-filter: blur(14px) saturate(140%);
+  border: 1px solid rgba(255, 255, 255, .14);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, .06) inset, 0 16px 36px rgba(2, 6, 20, .5); }
+.card::before { content: ""; position: absolute; left: 14px; right: 14px; top: -1px; height: 3px; border-radius: 0 0 3px 3px;
+  background: var(--sb, #7fb3f5); }
+.card[hidden] { display: none; }
+.card.touch { pointer-events: auto; }
+.card-kicker { margin: 0; font: 700 11px/1.3 var(--f-body); letter-spacing: .12em; text-transform: uppercase; color: var(--st, var(--ink-2)); }
+.card-name { margin: .2rem 0 .35rem; font: 700 1.3rem/1.15 var(--f-display); color: #fff; }
+.card-take { margin: 0; font-size: .98rem; line-height: 1.45; color: var(--ink); }
+.card-go { display: none; margin-top: .55rem; font-weight: 700; font-size: .95rem; color: #fff; }
+.card.touch .card-go { display: inline-block; }
+.card-click { margin: .5rem 0 0; font-size: .85rem; color: var(--ink-2); }
+
+/* event ticker under the chip */
+.ticker { position: absolute; left: 50%; bottom: 4.5%; transform: translateX(-50%); width: min(34rem, calc(100% - 24px));
+  display: flex; align-items: baseline; gap: .6rem; padding: .45rem .85rem; border-radius: 999px;
+  background: rgba(14, 26, 58, .66); border: 1px solid var(--navy-line); font-size: .9rem; color: var(--ink-2); }
+.tick-count { font-weight: 700; color: #9fe3ff; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.tick-text { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tick-replay { font: inherit; font-size: .85rem; color: var(--ink); background: transparent; border: 1px solid #3a4b78;
+  border-radius: 999px; padding: .1rem .7rem; cursor: pointer; }
+.tick-replay:hover { border-color: var(--ink-2); }
+.tick-replay:focus-visible { outline: 2px solid #7fb3f5; outline-offset: 2px; }
+
+/* ---------- section list + legend ---------- */
+.explore { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 2.5rem; max-width: 88rem;
+  margin: 0 auto; padding: 2.5rem 32px 3rem; border-top: 1px solid var(--navy-line); }
+.explore h2 { font: 700 1.6rem/1.2 var(--f-display); margin: 0 0 .3rem; color: #fff; }
+.explore-sub { margin: 0 0 1.1rem; color: var(--ink-2); font-size: 1rem; }
+.sections { list-style: none; margin: 0; padding: 0; display: grid; gap: .7rem; }
+.sec { display: grid; grid-template-columns: 2.1rem 1fr auto; gap: .2rem .9rem; align-items: center; padding: .8rem 1rem;
+  border-radius: 12px; background: var(--card); border: 1px solid rgba(255, 255, 255, .08); color: var(--ink);
+  text-decoration: none; transition: border-color .2s, background .2s, box-shadow .2s; }
+.sec:hover, .sec:focus-visible, .sec.hot { border-color: var(--sc); background: #1a2a57; box-shadow: 0 0 0 1px var(--sc) inset; }
+.sec:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+.sec-num { grid-row: span 2; width: 2.1rem; height: 2.1rem; border-radius: 8px; display: grid; place-items: center;
+  font-weight: 700; color: var(--navy); background: var(--sc); }
+.sec-name { font-weight: 700; color: #fff; font-size: 1.05rem; }
+.sec-where { font-size: .8rem; color: var(--ink-2); white-space: nowrap; }
+.sec-take { grid-column: 2 / span 2; font-size: .95rem; line-height: 1.45; color: var(--ink-2); }
+.legend ul { list-style: none; margin: .9rem 0 0; padding: 0; display: grid; gap: .85rem; }
+.legend li { display: grid; grid-template-columns: 1.6rem 1fr; gap: .7rem; font-size: .97rem; line-height: 1.5; color: var(--ink-2); }
+.sw { display: block; width: 1.6rem; height: .5rem; margin-top: .55rem; border-radius: 999px; }
+.sw-us { background: var(--c-us); box-shadow: 0 0 10px rgba(57, 135, 229, .8); }
+.sw-china { background: var(--c-china); box-shadow: 0 0 6px rgba(230, 103, 103, .5); }
+.sw-trace { background: #6fd6ff; box-shadow: 0 0 8px rgba(111, 214, 255, .6); }
+.sw-hover { background: linear-gradient(90deg, var(--c-acad), var(--c-ind), var(--c-us), var(--c-china), var(--c-joint)); }
+
+.foot { max-width: 88rem; margin: 0 auto; padding: 1.4rem 32px 2.6rem; border-top: 1px solid var(--navy-line);
+  font-size: .88rem; color: var(--ink-3); }
+.foot p { margin: 0 0 .45rem; }
+.foot b { color: var(--ink-2); }
+.foot code { font-size: .85em; }
+
+/* capture mode (?capture=1): only the chip, for baking a video */
+.capture .intro, .capture .explore, .capture .foot, .capture .pins, .capture .card, .capture .ticker,
+.capture .loading, .capture .skip { display: none !important; }
+.capture .hero { display: block; max-width: none; padding: 0; min-height: 0; background: none; }
+.capture .stage { position: fixed; left: 0; top: 0; width: 100vw; height: 100vh; max-height: none; min-height: 0; align-self: stretch; }
+.capture #chipCanvas { inset: 0; height: 100%; -webkit-mask-image: none; mask-image: none; cursor: default; }
+
+/* embed mode (?embed=1): the chip, its markers, card and ticker, plus the model credit; nothing else */
+.embed-credit { display: none; }
+.embed body { background: transparent; }
+.embed .intro, .embed .explore, .embed .foot, .embed .hint-touch, .embed .skip { display: none !important; }
+.embed .hero { display: block; max-width: none; padding: 0; min-height: 0; }
+.embed .stage { position: fixed; left: 0; top: 0; width: 100vw; height: 100vh; max-height: none; min-height: 0; margin: 0; align-self: stretch; }
+.embed #chipCanvas { inset: 0; height: 100%; }
+.embed .ticker { bottom: 34px; }
+.embed .embed-credit { display: block; position: absolute; left: 0; right: 0; bottom: 6px; margin: 0; text-align: center;
+  font-size: 11px; color: var(--ink-3); }
+.embed .embed-credit a { color: var(--ink-2); }
+
+/* ---------- narrow screens: stack ---------- */
+@media (max-width: 900px) {
+  .hero { grid-template-columns: 1fr; min-height: 0; padding: 0 16px; gap: 0; }
+  .intro { padding: 28px 0 0; }
+  .lede { font-size: 1.05rem; margin-bottom: 1.1rem; }
+  .cta-row { margin-bottom: .4rem; }
+  .intro .hint { display: none; }
+  .hint-touch { display: block; margin: 0 0 .4rem; text-align: center; max-width: none; font-size: .9rem; }
+  .stage { height: calc(125vw + 52px); max-height: 78svh; min-height: 360px; margin-top: .2rem; }
+  #chipCanvas { bottom: 52px; height: auto; }
+  .ticker { bottom: 6px; font-size: .82rem; }
+  .explore { grid-template-columns: 1fr; padding: 1.8rem 16px 2rem; gap: 2rem; }
+  .foot { padding: 1.2rem 16px 2rem; }
+}
+@media (max-width: 480px) {
+  .sec { grid-template-columns: 2.1rem 1fr; }
+  .sec-where { grid-column: 2; }
+  .sec-take { grid-column: 1 / -1; }
+  .card { width: min(17rem, calc(100% - 16px)); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cta, .pin, .sec { transition: none; }
+}

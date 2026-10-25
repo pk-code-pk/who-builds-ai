@@ -1,0 +1,91 @@
+/* Shared colors for every view in the story. Countries and sectors each have one
+   fixed color everywhere (checked for red-green color blindness). */
+:root {
+  --c-us: #2a78d6;      /* US */
+  --c-joint: #4a3aa7;   /* US + China together */
+  --c-china: #e34948;   /* China */
+  --c-other: #8a8984;   /* rest of world */
+  --ink: #1b1b1a;
+  --ink-2: #52514e;
+  --ink-3: #6b6a66;
+  --rule: #e6e5e0;
+  --surface: #fcfcfb;
+}
+
+.csc { position: relative; font: 14px/1.4 var(--csc-font, "Helvetica Neue", Helvetica, Arial, sans-serif); color: var(--ink); }
+.csc-controls { display: flex; justify-content: space-between; align-items: center; gap: .6rem 1rem; flex-wrap: wrap; margin-bottom: .35rem; }
+.csc-legend { display: flex; flex-wrap: wrap; gap: .3rem; }
+.csc button { font: inherit; font-size: 13px; color: var(--ink); background: #fff; border: 1px solid #cfcec9; border-radius: 999px;
+  padding: .22rem .7rem; cursor: pointer; }
+.csc button:hover { border-color: var(--ink-2); }
+.csc button:focus-visible { outline: 2px solid var(--c-us); outline-offset: 2px; }
+.csc-key i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: .4rem; vertical-align: -1px; }
+.csc-key.dim { opacity: .5; }
+.csc-key[aria-pressed="true"] { border-color: var(--ink); font-weight: 700; }
+.csc-mode { display: inline-flex; }
+.csc-mode button { border-radius: 0; }
+.csc-mode button:first-child { border-radius: 999px 0 0 999px; }
+.csc-mode button:last-child { border-radius: 0 999px 999px 0; border-left: 0; }
+.csc-mode button[aria-pressed="true"] { background: var(--ink); color: #fff; border-color: var(--ink); }
+
+.csc-svg { display: block; width: 100%; height: auto; overflow: visible; }
+.csc-svg text { font-size: 13px; fill: var(--ink); }
+.csc-axis text { font-size: 12px; fill: var(--ink-2); }
+.csc-axis-title { font-size: 12px !important; fill: var(--ink-2) !important; }
+.csc-grid line { stroke: var(--rule); }
+.csc-baseline { stroke: #b7b6b0; }
+.csc-line { fill: none !important; stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; }
+.csc-line.partial { stroke-dasharray: 4 4; }
+.csc-dot { stroke: var(--surface); stroke-width: 1.5; }
+.csc-dot.open { fill: var(--surface) !important; stroke-width: 2; }
+.csc-series { transition: opacity .25s; }
+.csc-series .csc-dot.open { stroke: inherit; }
+.csc-area { stroke: var(--surface); stroke-width: 2; transition: opacity .25s; }
+.csc-labels text { transition: opacity .25s; }
+.csc-controls-line line { stroke: var(--ink); stroke-width: 1.5; stroke-dasharray: 5 4; }
+.csc-controls-line text { font-size: 13px; fill: var(--ink); }
+.csc-ev { fill: var(--ink-3); cursor: pointer; }
+.csc-ev.main { fill: var(--ink); }
+.csc-ev:hover { fill: var(--c-china); }
+.csc-overlay { fill: transparent; pointer-events: all; cursor: crosshair; }
+.csc-hover line { stroke: var(--ink-2); stroke-width: 1; }
+.csc-hover circle { stroke: var(--surface); stroke-width: 2; }
+.csc-win { fill: #f1efe9; }
+.csc-win.alt { fill: #e9e7df; }
+.csc-win-pct { font-weight: 700; fill: var(--c-china) !important; filter: brightness(.8); }
+.csc-win-lbl { font-size: 12px !important; fill: var(--ink-2) !important; }
+.csc-win-head { font-size: 12px !important; font-weight: 700; fill: var(--ink) !important; }
+
+.csc-tip { position: absolute; z-index: 5; pointer-events: none; opacity: 0; transition: opacity .12s; max-width: 280px;
+  background: #fff; color: var(--ink); border: 1px solid #d6d5cf; border-radius: 8px; padding: .5rem .65rem;
+  box-shadow: 0 4px 14px rgba(0,0,0,.12); font-size: 13px; }
+.csc-tip.on { opacity: 1; }
+.csc-tip table { border-collapse: collapse; margin-top: .3rem; width: 100%; }
+.csc-tip td { padding: .08rem .3rem .08rem 0; }
+.csc-tip td:nth-child(2), .csc-tip td:nth-child(3) { text-align: right; font-variant-numeric: tabular-nums; }
+.csc-tip i { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: .35rem; }
+.csc-muted { color: var(--ink-2); }
+.csc-evkey { font-size: 13px; color: var(--ink-2); margin-right: auto; }
+.csc-evkey path { fill: var(--ink-3); }
+@media (max-width: 600px) {
+  .csc button { font-size: 12px; padding: .15rem .5rem; }
+  .csc-evkey { font-size: 12px; }
+}
+
+/* Dark theme (story page sets <html data-theme="dark">; the standalone page takes ?theme=dark).
+   Same hues as above, stepped lighter so each series stays distinguishable on the navy card. */
+[data-theme="dark"] {
+  --c-us: #3987e5; --c-joint: #b6a8ff; --c-china: #e66767; --c-other: #5f6880;
+  --ink: #e8ecf6; --ink-2: #aab5cf; --ink-3: #8d98b6; --rule: #26355f; --surface: #15234a;
+}
+[data-theme="dark"] .csc button { background: transparent; color: var(--ink); border-color: #3a4b78; }
+[data-theme="dark"] .csc button:hover { border-color: #8d98b6; }
+[data-theme="dark"] .csc-key[aria-pressed="true"] { border-color: var(--ink); }
+[data-theme="dark"] .csc-mode button[aria-pressed="true"] { background: var(--ink); color: #0b1530; border-color: var(--ink); }
+[data-theme="dark"] .csc-baseline { stroke: #4a5a86; }
+[data-theme="dark"] .csc-win { fill: #1b2b58; }
+[data-theme="dark"] .csc-win.alt { fill: #213264; }
+[data-theme="dark"] .csc-win-pct { fill: #ff9090 !important; filter: none; }
+[data-theme="dark"] .csc-ev:hover { fill: #ff9090; }
+[data-theme="dark"] .csc-tip { background: #ffffff; color: #0b1530; border-color: #ffffff; box-shadow: 0 8px 24px rgba(0, 0, 0, .4); }
+[data-theme="dark"] .csc-tip .csc-muted { color: #52514e; }

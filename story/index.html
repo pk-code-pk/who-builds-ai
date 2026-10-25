@@ -1,0 +1,375 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Who Builds AI Models?</title>
+<meta name="description" content="In about ten years, the AI models that matter went from mostly universities to a few US and Chinese companies. A CS 1710 data story." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700;9..144,800&amp;family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&amp;display=swap" />
+<link rel="stylesheet" href="../country-share/country_share_chart.css" />
+<link rel="stylesheet" href="story.css" />
+<script>document.documentElement.classList.add("js");</script>
+</head>
+<body>
+<a class="skip" href="#hook">Skip to the story</a>
+<div class="progress" aria-hidden="true"><i id="progress"></i></div>
+
+<!-- section navigator, drawn as a small chip: one "core" per part of the story arc -->
+<nav class="chipnav" aria-label="Story sections">
+  <button type="button" class="chip-toggle" aria-expanded="false" aria-controls="chipDie" aria-label="Story sections menu"><span id="chipCur">0</span></button>
+  <div class="chip-die" id="chipDie">
+    <span class="chip-mark">WHO·AI</span>
+    <a class="core" href="#top" data-act="top"><b>0</b><span>Start</span></a>
+    <a class="core" href="#hook" data-act="hook"><b>1</b><span>Hook</span></a>
+    <a class="core" href="#rising" data-act="rising"><b>2</b><span>Rising insights</span></a>
+    <a class="core" href="#message" data-act="message"><b>3</b><span>Main message</span></a>
+    <a class="core" href="#solution" data-act="solution"><b>4</b><span>What can change</span></a>
+  </div>
+</nav>
+
+<!-- ================= HERO: all 931 models, driven by scroll steps ================= -->
+<header class="hero" id="top" data-act="top">
+  <div class="hero-scrolly">
+    <div class="hero-graphic">
+      <div id="heroDots"></div>
+      <p class="hero-src">Each dot is one notable AI model, 2012 to Sep 30, 2026 (*partial year). Hover a dot for its name. Source: Epoch AI, Notable AI Models.</p>
+    </div>
+    <div class="hero-steps">
+      <div class="hstep hstep-title" data-step="0">
+        <p class="hub-link"><a href="../index.html">← Back to the chip</a></p>
+        <p class="kicker">A data story · CS 1710 · Prototype I</p>
+        <h1>Who builds AI models?</h1>
+        <p class="lede">In about ten years, the AI models that matter went from being built mostly by universities to being built by
+          a handful of <span class="c-us">US</span> and <span class="c-china">Chinese</span> companies. So where AI goes next depends on a
+          few firms, and on chip policy between two governments.</p>
+        <p class="byline">By Praneel Khiantani, Amy Munoz and Ashley Zheng</p>
+        <p class="cue">Scroll <span aria-hidden="true">↓</span></p>
+      </div>
+      <div class="hstep" data-step="1">
+        <p class="hs-big">931</p>
+        <p>notable AI models since 2012. Here they are by the year they came out, one column per year. There were 13 in 2012 and 119 in 2023.</p>
+      </div>
+      <div class="hstep" data-step="2">
+        <p class="hs-big"><span class="c-acad">21</span> of 33</p>
+        <p>Now color them by who built them. In 2014, <span class="c-acad">universities alone</span> built 21 of the 33.
+          <span class="c-ind">Companies alone</span> built 5. So far in 2026, universities alone have built 0 of 84.</p>
+      </div>
+      <div class="hstep" data-step="3">
+        <p class="hs-big"><span class="c-china">8% → 32%</span></p>
+        <p>Now color them by where they were built. <span class="c-china">China's</span> share went from 8% of notable models in
+          2012 to 2016 to 32% in 2024 to 2026. In 2024 to 2026, 91% of notable models had a <span class="c-us">US</span> or Chinese developer.</p>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+<!-- ================= 1. HOOK ================= -->
+<section class="act" id="hook" data-act="hook">
+  <div class="act-open reveal">
+    <span class="act-num">01</span>
+    <div><p class="act-name">Hook</p><p class="act-q">Universities used to build the AI everyone talked about.</p></div>
+  </div>
+
+  <article class="frame" id="frame1">
+    <p class="frame-no">Frame 1</p>
+    <div class="frame-lede reveal">
+      <div>
+        <h2>In 2014, universities built most of the notable AI models. In 2026, they built none.</h2>
+        <p class="text">In 2014, universities working on their own built <b>21 of the 33</b> most notable AI models.
+          So far in 2026 they have built <b>0 of 84</b>.</p>
+      </div>
+      <aside class="stat stat-acad"><span class="stat-num">0<small> of 84</small></span><span class="stat-cap">notable models in 2026 built by universities alone</span></aside>
+    </div>
+    <figure class="card-wip reveal">
+      <div class="wip-head"><span class="pill">Design draft</span><span class="owner"><i>PK</i> Praneel</span></div>
+      <div class="wip-body single">
+        <img src="img/draft_frame1_hook_dark.png" alt="Draft chart: two stacked bars. 2014 has 33 models, 21 of them academia only. 2026 has 84 models, 82 industry only and 0 academia only." />
+        <p class="wip-desc"><b>Planned D3 view:</b> two stacked bars, 2014 and 2026, split by sector. The bars grow in as you arrive and
+          hovering a block shows its count.</p>
+      </div>
+    </figure>
+    <p class="pull reveal">So who builds AI now?</p>
+  </article>
+</section>
+
+<!-- ================= 2. RISING INSIGHTS ================= -->
+<section class="act" id="rising" data-act="rising">
+  <div class="act-open reveal">
+    <span class="act-num">02</span>
+    <div><p class="act-name">Rising insights</p><p class="act-q">Four shifts, one after another.</p></div>
+  </div>
+
+  <article class="frame" id="frame2">
+    <p class="frame-no">Frame 2 · Shift one</p>
+    <div class="frame-lede reveal">
+      <div>
+        <h2>Industry took over</h2>
+        <p class="text">Models built only by universities fell from <b>46%</b> of notable models in 2012 to 2016 (66 of 143) to
+          <b>2%</b> in 2024 to 2026 (5 of 289). Models built only by companies went from 34% (49 of 143) to 90% (261 of 289).</p>
+      </div>
+      <aside class="stat stat-acad"><span class="stat-num">46%<small> → </small>2%</span><span class="stat-cap">share built by universities alone, 2012–16 vs 2024–26</span></aside>
+    </div>
+    <figure class="fig reveal">
+      <figcaption class="fig-head"><b>Notable models per year, by who built them</b><span>Share of each year · universities alone highlighted · hover a block for its count</span></figcaption>
+      <div class="embed">
+        <iframe id="frame2Timeline" title="Notable models per year by sector, as a share of each year, academia only highlighted"
+          src="../prototype-who-builds/index.html?embed=1&amp;panels=timeline&amp;share=1&amp;sector=Academia%20only&amp;range=2012-2026&amp;theme=dark&amp;id=frame2Timeline"></iframe>
+      </div>
+      <p class="fig-src">Each model is one sector. "Academia + Industry" means a university and a company built it together. Untick "show as share" to see raw counts. Source: Epoch AI, Notable AI Models.</p>
+    </figure>
+  </article>
+
+  <article class="frame" id="frame3">
+    <p class="frame-no">Frame 3 · Shift two</p>
+    <div class="frame-lede reveal">
+      <div>
+        <h2>One reason is cost</h2>
+        <p class="text">The most expensive training run in the data went from about <b>$2 million</b> (GPT-3, 2020) to about
+          <b>$388 million</b> (Grok 4, 2025), in 2023 dollars. Only about 1 in 5 models has a recorded cost, so the real top is probably even higher.</p>
+      </div>
+      <aside class="stat"><span class="stat-num">$2M<small> → </small>$388M</span><span class="stat-cap">most expensive training run, 2020 vs 2025</span></aside>
+    </div>
+    <figure class="card-wip reveal">
+      <div class="wip-head"><span class="pill pill-wip">In progress</span><span class="owner"><i>AM</i> Amy Munoz</span></div>
+      <div class="wip-body">
+        <div>
+          <p class="wip-title">Compute and cost frontier</p>
+          <p class="wip-desc">The most expensive training run each year, and the largest training compute, on a log scale so the
+            early years aren't flattened to zero.</p>
+          <ul class="wip-list">
+            <li>Each dot is a model with a recorded cost. The frontier line connects each year's record.</li>
+            <li>Hover a dot for the model, its lab and its cost.</li>
+          </ul>
+          <p class="wip-meta">Data: Epoch "Training compute cost (2023 USD)" and "Training compute (FLOP)"</p>
+        </div>
+        <svg class="sketch" viewBox="0 0 320 200" role="img" aria-label="Sketch of a log-scale chart where the most expensive training run climbs from about 2 million dollars in 2020 to about 388 million in 2025">
+          <g filter="url(#rough)">
+            <path class="sk-axis" d="M34 170 H304 M34 170 V18" />
+            <path class="sk-grid" d="M34 130 H304 M34 90 H304 M34 50 H304" />
+            <g class="sk-dots"><circle cx="60" cy="158" r="3"/><circle cx="78" cy="150" r="3"/><circle cx="95" cy="141" r="3"/><circle cx="104" cy="152" r="3"/><circle cx="120" cy="128" r="3"/><circle cx="138" cy="120" r="3"/><circle cx="151" cy="131" r="3"/><circle cx="168" cy="106" r="3"/><circle cx="182" cy="114" r="3"/><circle cx="196" cy="99" r="3"/><circle cx="214" cy="82" r="3"/><circle cx="230" cy="90" r="3"/><circle cx="246" cy="66" r="3"/><circle cx="262" cy="74" r="3"/><circle cx="280" cy="38" r="3"/></g>
+            <path class="sk-line" d="M60 158 L95 141 L120 128 L168 106 L196 99 L214 82 L246 66 L280 38" />
+          </g>
+          <text x="176" y="124" class="sk-txt">GPT-3 ≈ $2M</text>
+          <text x="214" y="30" class="sk-txt">Grok 4 ≈ $388M</text>
+          <text x="34" y="190" class="sk-lbl">2012</text><text x="276" y="190" class="sk-lbl">2026</text>
+          <text x="4" y="14" class="sk-lbl">log $</text>
+        </svg>
+      </div>
+    </figure>
+  </article>
+
+  <article class="frame" id="frame4">
+    <p class="frame-no">Frame 4 · Shift three</p>
+    <div class="frame-lede reveal">
+      <div>
+        <h2>The field is also narrowing</h2>
+        <p class="text"><b>119 labs</b> released at least one notable model in 2023. Only <b>43</b> did in 2025, and just five of them
+          (OpenAI, Google, Alibaba, Anthropic and xAI) worked on <b>59 of that year's 107</b> models.</p>
+      </div>
+      <aside class="stat"><span class="stat-num">119<small> → </small>43</span><span class="stat-cap">labs releasing a notable model, 2023 vs 2025</span></aside>
+    </div>
+    <figure class="fig reveal draw" id="labsFig">
+      <figcaption class="fig-head fig-head-row">
+        <span><b>Labs that released at least one notable model, per year</b><span>Click a bar or a button. The lab bubbles below switch to the same years.</span></span>
+        <span class="seg" role="group" aria-label="Pick years">
+          <button type="button" data-range="2023-2023">2023</button>
+          <button type="button" data-range="2025-2025">2025</button>
+          <button type="button" data-range="2024-2026">2024 to 2026</button>
+        </span>
+      </figcaption>
+      <div id="labsPerYear"></div>
+      <div class="embed embed-tight">
+        <iframe id="frame4Labs" title="Lab bubbles and concentration curve for the selected years"
+          src="../prototype-who-builds/index.html?embed=1&amp;panels=labs&amp;range=2023-2023&amp;theme=dark&amp;id=frame4Labs"></iframe>
+      </div>
+      <p class="fig-src">A model built by several labs counts once for each lab. One company's research units count as one lab
+        (for example, Google Brain and DeepMind are Google). Bubble color is the lab's home country. *2026 runs through Sep 30. Source: Epoch AI, Notable AI Models.</p>
+    </figure>
+    <blockquote class="pull-big reveal">
+      <p><span>5</span> labs worked on <span>59</span> of 2025's <span>107</span> notable models.</p>
+    </blockquote>
+  </article>
+
+  <article class="frame wide" id="frame5">
+    <p class="frame-no">Frame 5 · Shift four</p>
+    <h2 class="reveal">It is now a two-country race, and China's share kept growing after the US cut off its best chips</h2>
+    <div class="scrolly">
+      <div class="scrolly-graphic">
+        <figure class="fig fig-flush draw" id="countryFig">
+          <figcaption class="fig-head"><b>Share of each year's notable AI models, by where they were built</b><span>Hover any year · triangles mark US chip export rules</span></figcaption>
+          <div id="countryShare"></div>
+          <p class="fig-src">Source: Epoch AI, Notable AI Models · export-control events: our team's event list. <a href="../country-share/index.html">Full page with data table</a></p>
+        </figure>
+      </div>
+      <div class="scrolly-steps">
+        <div class="step" data-step="0">
+          <p>Each line is one group's share of the notable AI models published that year. In 2012 to 2016, <b>59%</b> came from
+            teams with a <span class="c-us">US</span> developer and no Chinese one, and <b>8%</b> from <span class="c-china">Chinese</span> teams (85 and 11 of 143).
+            In 2024 to 2026 it was <b>57%</b> and <b>32%</b> (166 and 92 of 289).</p>
+          <p>Counting joint US + China models too, the two countries went from 71% to 91% of all notable models.</p>
+        </div>
+        <div class="step" data-step="1">
+          <p><b><span class="c-china">China's</span> line is the one that moved.</b> Its share stayed under 15% in every
+            year before 2021. So far in 2026 it is <b>35%</b> (29 of 84).</p>
+        </div>
+        <div class="step" data-step="2">
+          <p><b>It kept rising after October 7, 2022</b>, when the US limited exports of advanced AI chips to China.
+            China built <b>13%</b> of notable models in the two years before (21 of 159), <b>22%</b> in the two years after
+            (47 of 211) and <b>32%</b> in the two years after that (71 of 222).</p>
+          <p class="caveat">This counts models, not how good they are or how much computing went into them. It doesn't prove
+            the controls failed, since a lot else changed at the same time.</p>
+        </div>
+        <div class="step" data-step="3">
+          <p><b>Your turn.</b> Hover any year for its shares and counts. The triangles under the axis are every US
+            export-control event in our list. Hover one to see Nvidia's stock move in the 5 trading days after.</p>
+        </div>
+      </div>
+    </div>
+    <p class="fig-src fig-src-out">Source: Epoch AI, Notable AI Models. Export-control events: our team's event list.
+      <a href="../country-share/index.html">Full page with data table</a>. Each model counts once: "US" if a US organization built it and no Chinese one did, "China" the other way
+      round, "US + China together" if both, "Rest of world" if neither. Hong Kong counts as China.</p>
+  </article>
+
+  <article class="frame" id="frame6">
+    <p class="frame-no">Frame 6 · The policy lever</p>
+    <div class="frame-lede reveal">
+      <div>
+        <h2>Export controls move markets, but China's model output kept climbing</h2>
+        <p class="text">Across the <b>22</b> US export-control events in our list, Nvidia's stock moved anywhere from <b>−11%</b>
+          to <b>+10%</b> in the 5 trading days after. The median move was about <b>−2%</b>.</p>
+      </div>
+      <aside class="stat"><span class="stat-num">−2%</span><span class="stat-cap">median 5-day Nvidia move after a US export-control event</span></aside>
+    </div>
+    <figure class="card-wip reveal">
+      <div class="wip-head"><span class="pill pill-wip">In progress</span><span class="owner"><i>AZ</i> Ashley Zheng</span></div>
+      <div class="wip-body">
+        <div>
+          <p class="wip-title">Chip policy strip chart</p>
+          <p class="wip-desc">One dot per policy event, placed by Nvidia's 5-day stock reaction and grouped by event type, with each
+            group's median marked.</p>
+          <ul class="wip-list">
+            <li>Export-control events are highlighted and share their dates with the triangles in Frame 5.</li>
+            <li>Hover a dot for the event and its reaction.</li>
+          </ul>
+          <p class="wip-meta">Working today: <a href="../chip-policy.html">Chip Policy Shock Map</a> · Data: data/events.csv, data/prices/NVDA.csv</p>
+        </div>
+        <svg class="sketch" viewBox="0 0 320 200" role="img" aria-label="Sketch of a strip chart: rows of dots for each event type spread around a zero line, export controls highlighted">
+          <g filter="url(#rough)">
+            <path class="sk-axis" d="M160 16 V176" />
+            <path class="sk-grid" d="M20 48 H304 M20 92 H304 M20 136 H304" />
+            <g class="sk-dots hot"><circle cx="102" cy="48" r="4"/><circle cx="110" cy="44" r="4"/><circle cx="126" cy="50" r="4"/><circle cx="131" cy="45" r="4"/><circle cx="142" cy="49" r="4"/><circle cx="152" cy="46" r="4"/><circle cx="164" cy="50" r="4"/><circle cx="172" cy="45" r="4"/><circle cx="188" cy="49" r="4"/><circle cx="214" cy="46" r="4"/><circle cx="226" cy="50" r="4"/></g>
+            <g class="sk-dots"><circle cx="112" cy="92" r="4"/><circle cx="140" cy="90" r="4"/><circle cx="150" cy="94" r="4"/><circle cx="168" cy="90" r="4"/><circle cx="200" cy="93" r="4"/><circle cx="236" cy="91" r="4"/><circle cx="130" cy="136" r="4"/><circle cx="156" cy="134" r="4"/><circle cx="162" cy="138" r="4"/><circle cx="176" cy="135" r="4"/><circle cx="190" cy="137" r="4"/></g>
+            <path class="sk-med" d="M152 36 V60 M150 82 V104 M160 126 V148" />
+          </g>
+          <text x="22" y="34" class="sk-txt hot">export controls</text>
+          <text x="22" y="80" class="sk-lbl">tariffs</text><text x="22" y="124" class="sk-lbl">China actions</text>
+          <text x="112" y="194" class="sk-lbl">0% Nvidia 5-day move</text>
+        </svg>
+      </div>
+    </figure>
+  </article>
+</section>
+
+<!-- ================= 3. MAIN MESSAGE ================= -->
+<section class="act" id="message" data-act="message">
+  <div class="act-open reveal">
+    <span class="act-num">03</span>
+    <div><p class="act-name">Main message</p><p class="act-q">Put the four shifts together.</p></div>
+  </div>
+  <article class="frame" id="frame7">
+    <p class="frame-no">Frame 7</p>
+    <h2 class="big reveal">A few <span class="c-us">US</span> and <span class="c-china">Chinese</span> companies now build the AI that matters</h2>
+    <div class="msg-stats reveal">
+      <p><b>91%</b><span>of notable models since 2024 had a US or Chinese developer (262 of 289)</span></p>
+      <p><b>50 · 32 · 27</b><span>models since 2024 from the three most active labs: OpenAI, Google and Alibaba</span></p>
+    </div>
+    <p class="text reveal">So where AI goes next depends on a handful of firms, and on chip policy between two governments.</p>
+    <figure class="card-wip reveal">
+      <div class="wip-head"><span class="pill">Design draft · novel view</span><span class="owner"><i>PK</i> Praneel</span></div>
+      <div class="wip-body single">
+        <img src="img/draft_frame7_bubbles_dark.png" alt="Draft chart: lab bubbles for 2024 to 2026 grouped into US, China and rest of world. The US group has 41 labs, China 27 and rest of world 21. OpenAI, Google and Alibaba are the largest circles." />
+        <p class="wip-desc"><b>Planned D3 view:</b> our lab bubbles for 2024 to 2026, pulled apart into a US group and a China group.
+          Hover a lab for its models, and toggle between one cluster and the country groups.</p>
+      </div>
+    </figure>
+  </article>
+</section>
+
+<!-- ================= 4. SOLUTION ================= -->
+<section class="act" id="solution" data-act="solution">
+  <div class="act-open reveal">
+    <span class="act-num">04</span>
+    <div><p class="act-name">What can change</p><p class="act-q">The trend isn't fixed.</p></div>
+  </div>
+  <article class="frame" id="frame8">
+    <p class="frame-no">Frame 8</p>
+    <h2 class="reveal">What can change this</h2>
+    <ol class="takeaways reveal">
+      <li><b>Give universities shared public computing power.</b> The NSF's National AI Research Resource pilot, started in
+        January 2024, is one example. It lets researchers use computers they couldn't afford alone, so open research can
+        still build frontier models.</li>
+      <li><b>Judge chip policy by what it changes in who builds AI</b>, not only by how chip stocks react.</li>
+      <li><b>Explore the data yourself.</b> Drag across any years below and hover any lab.</li>
+    </ol>
+    <figure class="fig reveal">
+      <figcaption class="fig-head"><b>Explore: who built notable AI models, in any years you pick</b><span>Drag across years on the timeline · hover a lab bubble to trace it · click a sector to see its labs</span></figcaption>
+      <div class="embed">
+        <iframe id="frame8Full" title="Full interactive view: notable models by sector, labs and concentration"
+          src="../prototype-who-builds/index.html?embed=1&amp;range=2024-2026&amp;theme=dark&amp;id=frame8Full"></iframe>
+      </div>
+      <p class="fig-src">Source: Epoch AI, Notable AI Models. <a href="../prototype-who-builds/index.html">Open full screen</a></p>
+    </figure>
+  </article>
+</section>
+</main>
+
+<footer class="foot">
+  <div class="foot-grid">
+    <div>
+      <p class="foot-title">Who builds AI models?</p>
+      <p>A data story by Praneel Khiantani, Amy Munoz and Ashley Zheng for CS 1710, Fall 2026. Prototype I, work in progress.</p>
+      <p class="foot-links"><a href="../index.html">Back to the chip</a> · <a href="../prototype-who-builds/index.html">Dashboard</a> · <a href="../country-share/index.html">Country share</a> · <a href="../chip-policy.html">Chip Policy Shock Map</a></p>
+    </div>
+    <div>
+      <p class="foot-title">How we counted</p>
+      <ul>
+        <li><b>Models.</b> Epoch's notable list: a model beat the previous best result on a task, was highly cited, was widely used,
+          cost a lot to train, or mattered historically. 931 models, 2012 to Sep 30, 2026.</li>
+        <li><b>Sectors</b> come from Epoch's organization type. A university and a company together is its own sector.</li>
+        <li><b>Labs.</b> A model built by several labs counts once for each. One company's units count as one lab
+          (Google Brain and DeepMind are Google, Facebook AI Research is Meta, Microsoft Research is Microsoft). A lab's country is
+          the one it is listed under on most of its models.</li>
+        <li><b>Countries.</b> Each model counts once: US, China, US + China together, or rest of world. Hong Kong counts as China.</li>
+      </ul>
+    </div>
+    <div>
+      <p class="foot-title">Sources</p>
+      <ul>
+        <li>Epoch AI, Notable AI Models (downloaded Oct 3, 2026).</li>
+        <li>Our list of US-China chip policy events, from Reuters, Bloomberg, the New York Times, the Financial Times, CNBC and
+          official releases.</li>
+        <li>Nvidia daily prices from Yahoo Finance. A 5-day reaction is the close 4 trading days after the event divided by the
+          close before it, minus 1.</li>
+      </ul>
+    </div>
+  </div>
+</footer>
+
+<!-- hand-drawn wobble for the sketch previews -->
+<svg width="0" height="0" aria-hidden="true" style="position:absolute">
+  <filter id="rough"><feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="2" seed="3" /><feDisplacementMap in="SourceGraphic" scale="2.2" /></filter>
+</svg>
+
+<script src="../prototype-who-builds/d3.v7.min.js"></script>
+<script src="vendor/scrollama.min.js"></script>
+<script src="../prototype-who-builds/data/who_builds.js"></script>
+<script src="../country-share/data/country_share.js"></script>
+<script src="../country-share/country_share_chart.js"></script>
+<script src="js/labs_per_year.js"></script>
+<script src="js/hero_dots.js"></script>
+<script src="js/story.js"></script>
+</body>
+</html>

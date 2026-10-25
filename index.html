@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Who Builds AI Models? 3D chip</title>
+<meta name="description" content="In about ten years, the AI models that matter went from mostly universities to a few US and Chinese companies. Hover the chip to pick a part of the story." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700;9..144,800&amp;family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&amp;display=swap" />
+<link rel="stylesheet" href="chip/chip.css" />
+</head>
+<body>
+<a class="skip" href="#sections">Skip to the section list</a>
+
+<main>
+  <header class="hero">
+    <div class="intro">
+      <p class="kicker">A data story · CS 1710</p>
+      <h1>Who builds AI models?</h1>
+      <p class="lede">In about ten years, the AI models that matter went from being built mostly by
+        <span class="c-acad">universities</span> to being built by a few <span class="c-us">US</span> and
+        <span class="c-china">Chinese</span> companies. So where AI goes next depends on a few firms, and on chip policy
+        between two governments.</p>
+      <p class="cta-row"><a class="cta" href="story/index.html">Start the story <span aria-hidden="true">→</span></a></p>
+      <p class="hint" id="hint">Each part of the chip is one part of the story. Point at a part to preview it, click to go there, drag to tilt the chip.</p>
+    </div>
+
+    <div class="stage" id="stage">
+      <canvas id="chipCanvas" aria-hidden="true"></canvas>
+      <div class="pins" id="pins" aria-hidden="true"></div>
+      <div class="card" id="card" aria-hidden="true" hidden>
+        <p class="card-kicker" id="cardKicker"></p>
+        <p class="card-name" id="cardName"></p>
+        <p class="card-take" id="cardTake"></p>
+        <a class="card-go" id="cardGo" href="#" tabindex="-1">Open this part <span aria-hidden="true">→</span></a>
+      </div>
+      <p class="loading" id="loading">Loading the chip…</p>
+      <p class="nogl" id="nogl" hidden>Your browser can't show the 3D chip (WebGL is off). The section links below work the same way.</p>
+      <div class="ticker" id="ticker" aria-live="off">
+        <span class="tick-count" id="tickCount">0 / 22</span>
+        <span class="tick-text" id="tickText">US export-control events</span>
+        <button type="button" class="tick-replay" id="tickReplay" hidden>Replay</button>
+      </div>
+      <p class="embed-credit">3D model: <a href="https://sketchfab.com/3d-models/microchip-prototype-7d00abe914664a17b4bf18c6e851e7eb" target="_blank" rel="noopener">"Microchip - Prototype"</a>
+        by re1monsen, <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>, modified (textures resized, compressed)</p>
+    </div>
+    <p class="hint hint-touch">Tap a part of the chip to preview it, tap it again to open it. Drag sideways to turn the chip.</p>
+  </header>
+
+  <section class="explore" id="sections" aria-labelledby="sectionsTitle">
+    <div class="explore-list">
+      <h2 id="sectionsTitle">The parts of the chip</h2>
+      <p class="explore-sub">The same five links as the chip. Each one opens that part of the story.</p>
+      <ol class="sections" id="sectionList"></ol>
+    </div>
+
+    <aside class="legend" aria-labelledby="legendTitle">
+      <h2 id="legendTitle">What the glow means</h2>
+      <ul>
+        <li><i class="sw sw-us"></i><span><b>The blue bar on the left edge is the US.</b> It runs <b id="lgUs">57%</b> of the way
+          up the chip, the share of notable AI models from 2024 to 2026 with a US developer and no Chinese one
+          (<span id="lgUsN">166 of 289</span>). The circuits on that edge glow blue at the same strength.</span></li>
+        <li><i class="sw sw-china"></i><span><b>The red bar on the right edge is China.</b> It runs <b id="lgCn">32%</b> of the way
+          up, China's share of the same models (<span id="lgCnN">92 of 289</span>). Its circuits glow red at that strength.</span></li>
+        <li><i class="sw sw-trace"></i><span><b>The circuit pulses <span id="lgEvN">22</span> times when the page opens</b>, once for each
+          US export-control event on AI chips in our list (<span id="lgEvRange">2018 to 2026</span>). The line under the chip names each one.</span></li>
+        <li><i class="sw sw-hover"></i><span><b>Pointing at a part</b> lights it in that section's color. The colors match the
+          story: green for universities, amber for companies, blue for the US, red for China, violet for the two together.</span></li>
+      </ul>
+    </aside>
+  </section>
+</main>
+
+<footer class="foot">
+  <p><b>3D model:</b> <a href="https://sketchfab.com/3d-models/microchip-prototype-7d00abe914664a17b4bf18c6e851e7eb">"Microchip - Prototype"</a>
+    by re1monsen, licensed under
+    <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. Modified: ground removed, textures resized and compressed, glow colors changed.</p>
+  <p><b>Data:</b> Epoch AI, Notable AI Models (models published through Sep 30, 2026). Export-control events: our team's event list
+    (<code>data/events.csv</code>). Built with three.js (MIT license).</p>
+  <p>By Praneel Khiantani, Amy Munoz and Ashley Zheng · CS 1710</p>
+</footer>
+
+<script src="country-share/data/country_share.js"></script>
+<script src="vendor/three/three.chip.min.js"></script>
+<script src="chip/chip_model.js"></script>
+<script src="chip/chip.js"></script>
+</body>
+</html>
