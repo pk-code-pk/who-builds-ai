@@ -49,13 +49,18 @@ h1 { font: 800 clamp(2.6rem, 5.2vw, 4.6rem)/1 var(--f-display); letter-spacing: 
 .menu { grid-area: menu; align-self: start; padding: 1.3rem 0 40px; }
 .menu-title { margin: 0 0 .55rem; font: 700 12px/1.3 var(--f-body); letter-spacing: .14em; text-transform: uppercase; color: var(--ink-2); }
 .sections { list-style: none; margin: 0; padding: 0; display: grid; gap: .4rem; }
-.sec { display: grid; grid-template-columns: .8rem 1fr; gap: .05rem .7rem; align-items: center; padding: .5rem .8rem;
-  border-radius: 10px; background: rgba(21, 35, 74, .55); border: 1px solid rgba(255, 255, 255, .08); color: var(--ink);
-  text-decoration: none; transition: border-color .2s, background .2s, box-shadow .2s; }
-.sec:hover, .sec:focus-visible, .sec.hot { border-color: var(--sc); background: #1a2a57; box-shadow: 0 0 0 1px var(--sc) inset; }
+.sec { position: relative; overflow: hidden; display: grid; grid-template-columns: .8rem 1fr; gap: .05rem .7rem; align-items: center;
+  padding: .5rem .8rem .5rem 1rem; border-radius: 10px; background: rgba(21, 35, 74, .55); border: 1px solid rgba(255, 255, 255, .08);
+  color: var(--ink); text-decoration: none; transition: border-color .2s, background .2s, box-shadow .2s; }
+/* a left edge in the section's color, faint until its part of the chip is lit */
+.sec::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--sl, var(--sc));
+  opacity: .35; transition: opacity .2s, box-shadow .2s; }
+.sec:hover, .sec:focus-visible, .sec.hot { border-color: var(--sc); background: #1a2a57; box-shadow: 0 0 0 1px var(--sc) inset, 0 0 18px -6px var(--sc); }
+.sec:hover::before, .sec:focus-visible::before, .sec.hot::before { opacity: 1; box-shadow: 0 0 10px var(--sc); }
 .sec:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 .sec-dot { grid-row: span 2; width: .8rem; height: .8rem; border-radius: 50%; background: var(--sd, var(--sc));
-  box-shadow: 0 0 8px var(--sc); }
+  opacity: .75; box-shadow: 0 0 4px var(--sc); transition: opacity .2s, box-shadow .2s, transform .2s; }
+.sec:hover .sec-dot, .sec:focus-visible .sec-dot, .sec.hot .sec-dot { opacity: 1; transform: scale(1.25); box-shadow: 0 0 6px var(--sc), 0 0 14px var(--sc); }
 .sec-name { font-weight: 700; color: #fff; font-size: 1rem; line-height: 1.3; }
 .sec-name::after { content: " →"; color: var(--ink-3); font-weight: 400; }
 .sec-take { font-size: .88rem; line-height: 1.35; color: var(--ink-2); }
@@ -63,12 +68,13 @@ h1 { font: 800 clamp(2.6rem, 5.2vw, 4.6rem)/1 var(--f-display); letter-spacing: 
 /* floating label at the part of the chip under the pointer (or named in the menu) */
 .part-label { position: absolute; left: 0; top: 0; z-index: 4; max-width: 17.5rem; padding: .45rem .7rem .5rem;
   border-radius: 10px; pointer-events: none; display: grid; gap: .1rem;
-  background: rgba(11, 21, 48, .82); border: 1px solid var(--lc, #7fb3f5); box-shadow: 0 10px 24px rgba(2, 6, 20, .5); }
+  background: rgba(11, 21, 48, .86); border: 1px solid var(--lc, #7fb3f5); box-shadow: 0 0 16px -4px var(--lc), 0 10px 24px rgba(2, 6, 20, .5); }
 .part-label[hidden] { display: none; }
 .part-label::after { content: ""; position: absolute; left: var(--ax, 50%); bottom: -6px; width: 10px; height: 10px; margin-left: -5px;
   background: rgba(11, 21, 48, .92); border-right: 1px solid var(--lc); border-bottom: 1px solid var(--lc); transform: rotate(45deg); }
 .part-label.below::after { bottom: auto; top: -6px; transform: rotate(225deg); }
-.pl-name { font: 700 1rem/1.2 var(--f-display); color: #fff; }
+.pl-name { font: 700 1rem/1.2 var(--f-display); color: var(--lc, #fff); }
+.part-label::before { content: ""; position: absolute; left: 10px; right: 10px; top: -1px; height: 3px; border-radius: 0 0 3px 3px; background: var(--lc); }
 .pl-take { font-size: .85rem; line-height: 1.35; color: var(--ink); }
 .pl-go { font-size: .78rem; color: var(--ink-2); }
 .part-label.list .pl-go { display: none; }
@@ -183,5 +189,5 @@ h1 { font: 800 clamp(2.6rem, 5.2vw, 4.6rem)/1 var(--f-display); letter-spacing: 
   .card { width: min(17rem, calc(100% - 16px)); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .cta, .sec { transition: none; }
+  .cta, .sec, .sec::before, .sec-dot { transition: none; }
 }

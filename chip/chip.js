@@ -73,14 +73,17 @@
   // "pin" is where the part's floating label points, [x, y, z].
   var WIN_X = 1.144;                  // the window in the white frame spans x = -1.144..1.144
   var REGIONS = [
-    { sec: 'who', parts: ['lid', 'logo'], pin: [-0.48, 1.1, 0.42] },                       // the raised lid
-    { sec: 'compute', parts: ['die', 'wall'], pin: [0.18, 0.36, 0.5] },                   // the glowing die under it
+    { sec: 'who', parts: ['lid', 'logo'], pin: [-0.55, 1.1, -0.52] },                       // the raised lid
+    { sec: 'compute', parts: ['die', 'wall'], pin: [0.18, 0.36, 0.5], below: true },                   // the glowing die under it
     { sec: 'narrow', parts: ['floor', 'frame_wall'], pin: [-0.92, 0.35, 0.6] },          // the window's floor around the die
     { sec: 'race', parts: [], pin: [-1.45, 0.385, -0.72], color: '#3987e5', level: US.p },  // left side of the frame: US
     { sec: 'race', parts: [], pin: [1.45, 0.385, -0.72], color: '#e66767', level: CN.p },   // right side of the frame: China
     { sec: 'policy', parts: ['layer_top', 'layer_mid', 'layer_base', 'strip_top', 'strip_low', 'edge_lights'],
       pin: [1.05, 0.1, 1.08] },                                                              // the layered outer edge, and the frame's front and back
   ];
+  // the color each part lights up in when its section is hovered, focused or toured
+  ['#5bd178', '#f2b84b', '#e8ecf6', '#3987e5', '#e66767', '#b6a8ff'].forEach(function (c, i) { REGIONS[i].lit = c; });
+  function litOf(sec) { return REGIONS.filter(function (r) { return r.sec === sec; })[0].lit; }
   var PART_REGION = {};
   REGIONS.forEach(function (r, i) { r.parts.forEach(function (p) { PART_REGION[p] = i; }); });
   // The two data bars run along the top of the frame's left and right sides, from the front edge toward the back.
@@ -96,8 +99,8 @@
   ORDER.forEach(function (key) {
     var s = SECTIONS[key];
     var li = document.createElement('li');
-    var dot = key === 'race' ? ';--sd:linear-gradient(90deg, #3987e5 50%, #e66767 50%)' : '';
-    li.innerHTML = '<a class="sec" href="' + s.href + '" data-sec="' + key + '" style="--sc:' + s.color + dot + '">' +
+    var dot = key === 'race' ? ';--sd:linear-gradient(90deg, #3987e5 50%, #e66767 50%);--sl:linear-gradient(180deg, #3987e5 50%, #e66767 50%)' : '';
+    li.innerHTML = '<a class="sec" href="' + s.href + '" data-sec="' + key + '" style="--sc:' + litOf(key) + dot + '">' +
       '<span class="sec-dot" aria-hidden="true"></span><span class="sec-name">' + s.name + '</span>' +
       '<span class="sec-take">' + s.short + '</span></a>';
     list.appendChild(li);
@@ -167,15 +170,16 @@
   holder.position.y = -0.45;
 
   // soft cyan glow: a round gradient drawn once, used under the chip and around the die
+  var GLOW_CYAN = new T.Color('#4cc9f0');
   function glowTexture() {
     var c = document.createElement('canvas'); c.width = c.height = 256;
     var g = c.getContext('2d'), grad = g.createRadialGradient(128, 128, 0, 128, 128, 128);
-    grad.addColorStop(0, 'rgba(76,201,240,0.6)'); grad.addColorStop(0.4, 'rgba(76,201,240,0.22)'); grad.addColorStop(1, 'rgba(76,201,240,0)');
+    grad.addColorStop(0, 'rgba(255,255,255,0.6)'); grad.addColorStop(0.4, 'rgba(255,255,255,0.22)'); grad.addColorStop(1, 'rgba(255,255,255,0)');
     g.fillStyle = grad; g.fillRect(0, 0, 256, 256);
     var tex = new T.CanvasTexture(c); tex.colorSpace = T.SRGBColorSpace; return tex;
   }
   function glowPlane(w, d, opacity) {
-    var m = new T.Mesh(new T.PlaneGeometry(w, d), new T.MeshBasicMaterial({ map: glowTexture(), transparent: true, depthWrite: false,
+    var m = new T.Mesh(new T.PlaneGeometry(w, d), new T.MeshBasicMaterial({ color: GLOW_CYAN, map: glowTexture(), transparent: true, depthWrite: false,
       blending: T.AdditiveBlending, opacity: opacity }));
     m.rotation.x = -Math.PI / 2; return m;
   }
@@ -210,7 +214,7 @@
   /* ------------------------------------------------------------------ materials: one region glow shader for all parts */
   var U = {
     uToChip: { value: new T.Matrix4() },
-    uRegCol: { value: REGIONS.map(function (r) { return new T.Color(r.color || SECTIONS[r.sec].color); }) },
+    uRegCol: { value: REGIONS.map(function (r) { return new T.Color(r.lit); }) },
     uRegHover: { value: [0, 0, 0, 0, 0, 0] },
     uRegFlick: { value: [0, 0, 0, 0, 0, 0] },
     uBaseCol: { value: new T.Color('#4cc9f0') },   // the site's blue, pushed a little toward cyan
@@ -235,6 +239,19 @@
     'uniform vec3 uBaseCol; uniform float uBase; uniform float uBreath; uniform vec4 uPacket[2]; uniform float uDim;',
     'uniform vec4 uBar[2]; uniform vec3 uBarCol[2]; uniform float uBarGrow;',
     'float band(float a, float b, float x, float s) { return smoothstep(a - s, a + s, x) * (1.0 - smoothstep(b - s, b + s, x)); }',
+    // how lit this spot is (0..1) and in which color, from the region it belongs to
+    'float litAt(vec2 p, out vec3 col) {',
+    '  float m[6]; for (int i = 0; i < 6; i++) m[i] = 0.0;',
+    '#if PART_KIND == 4',
+    '  float sl = 1.0 - smoothstep(-' + WIN_X + ' - 0.006, -' + WIN_X + ' + 0.006, p.x);',
+    '  float sr = smoothstep(' + WIN_X + ' - 0.006, ' + WIN_X + ' + 0.006, p.x);',
+    '  m[3] = sl; m[4] = sr; m[5] = 1.0 - sl - sr;',
+    '#else',
+    '  m[PART_REGION] = 1.0;',
+    '#endif',
+    '  float h = 0.0; col = vec3(0.0);',
+    '  for (int i = 0; i < 6; i++) { col += uRegCol[i] * m[i] * uRegHover[i]; h = max(h, m[i] * uRegHover[i]); }',
+    '  return h; }',
     // x: bar (lit part), y: its full-length slot
     'vec2 barMask(int k, vec2 p) {',
     '  vec4 b = uBar[k]; float zEnd = mix(b.w, b.z, uBarGrow);',
@@ -243,6 +260,9 @@
   ].join('\n');
   // the frame's bars sit in a dark, matte slot, so their color reads clearly against the silver
   var FRAG_COLOR = [
+    // a lit part's surface itself turns its section color (metal reflects in that color too), so it reads as colored, not white
+    '{ vec3 lc; float lh = litAt(vChip.xz, lc);',
+    '  diffuseColor.rgb = mix(diffuseColor.rgb, diffuseColor.rgb * lc / max(lh, 1e-3) * 1.15, lh * TINTD); }',
     'float slot = 0.0;',
     '#if PART_KIND == 4',
     '  vec2 b0 = barMask(0, vChip.xz), b1 = barMask(1, vChip.xz);',
@@ -274,7 +294,7 @@
     '  #ifdef STRIP_C',   // edge strips: a bright line along the strip's middle
     '    trace = 0.05 + 0.95 * exp(-pow((vChip.y - STRIP_C) / STRIP_W, 2.0));',
     '  #endif',
-    '  em = trace * (uBaseCol * uBase * GLOW * (1.0 - hov) + hc * 1.5);',
+    '  em = trace * (uBaseCol * uBase * GLOW * (1.0 - hov) + hc * HGAIN);',
     // data packets: a small bright spot that runs along the edge lights or across the die
     '  for (int j = 0; j < 2; j++) {',
     '    vec2 d = cp - uPacket[j].xy;',
@@ -282,9 +302,17 @@
     '  }',
     '#elif PART_KIND == 3',
     '  float trace = smoothstep(0.5, 0.85, max(totalEmissiveRadiance.r, max(totalEmissiveRadiance.g, totalEmissiveRadiance.b)));',
-    '  em = trace * uBaseCol * uBase * GLOW * (1.0 - hov) + hc * (0.05 + 0.9 * trace);',
-    '#else',
-    '  em = hc * 0.12;',
+    '  em = trace * uBaseCol * uBase * GLOW * (1.0 - hov) + hc * (0.1 + 1.3 * trace);',
+    '#endif',
+    // lit part: a soft wash of its section color (TINT) and a brighter rim where the surface turns away from the camera
+    'float fres = pow(1.0 - clamp(abs(dot(normal, normalize(vViewPosition))), 0.0, 1.0), 2.5);',
+    'em += hc * (TINT + RIM * fres);',
+    '#if PART_KIND == 4',
+    // the frame: a glowing outline around the lit stretch (outer edge, the line between sides and front/back, the window rim)
+    '  float eOut = 1.0 - smoothstep(0.0, 0.035, min(1.742 - abs(cp.x), 1.059 - abs(cp.y)));',
+    '  float eBand = 1.0 - smoothstep(0.004, 0.022, abs(abs(cp.x) - ' + WIN_X + '));',
+    '  float eWin = (1.0 - smoothstep(0.004, 0.022, abs(abs(cp.y) - 0.839))) * step(abs(cp.x), ' + WIN_X + ');',
+    '  em += hc * 1.2 * max(eOut, max(eBand, eWin));',
     '#endif',
     '#if PART_KIND == 4',
     '  for (int k = 0; k < 2; k++) {',
@@ -297,9 +325,16 @@
     'float chipDim = mix(uDim, 1.0, hov);',
   ].join('\n');
 
+  // tint, rim: how strongly a lit part washes with its section color, and how bright its rim gets
+  // (third number: how far the part's own surface color shifts toward the section color)
+  // (fourth: for glowing parts, how bright their circuitry or light gets in the section color)
+  var LIT = { lid: [0.22, 2.4, 0.75], logo: [0.0, 0.0, 0.0], frame: [0.16, 1.0, 0.6], frame_wall: [0.3, 1.0, 0.6], floor: [0.24, 0.6, 0.6],
+    die: [0.05, 0.8, 0.0, 2.2], layer_top: [0.25, 1.0, 0.5], layer_mid: [0.25, 1.0, 0.5], layer_base: [0.2, 1.0, 0.5],
+    strip_top: [0.1, 0.6, 0.0, 1.2], strip_low: [0.1, 0.6, 0.0, 1.2], edge_lights: [0.15, 0.6, 0.0, 1.4] };
   function chipMaterial(part, mat, kind, glow) {
-    var region = PART_REGION[part] === undefined ? 5 : PART_REGION[part];
-    mat.defines = Object.assign({ PART_KIND: kind, PART_REGION: region, GLOW: (glow || 1).toFixed(3) }, mat.defines);
+    var region = PART_REGION[part] === undefined ? 5 : PART_REGION[part], lit = LIT[part] || [0.3, 1.2, 0.5];
+    mat.defines = Object.assign({ PART_KIND: kind, PART_REGION: region, GLOW: (glow || 1).toFixed(3),
+      TINT: lit[0].toFixed(3), RIM: lit[1].toFixed(3), TINTD: lit[2].toFixed(3), HGAIN: (lit[3] || 2.2).toFixed(3) }, mat.defines);
     mat.onBeforeCompile = function (sh) {
       Object.assign(sh.uniforms, U);
       sh.vertexShader = sh.vertexShader
@@ -312,7 +347,7 @@
         .replace('#include <emissivemap_fragment>', '#include <emissivemap_fragment>\n' + FRAG_BODY)
         .replace('#include <dithering_fragment>', '#include <dithering_fragment>\ngl_FragColor.rgb *= chipDim;');
     };
-    mat.customProgramCacheKey = function () { return 'chip-' + kind + '-' + region + '-' + glow; };
+    mat.customProgramCacheKey = function () { return 'chip-' + part + '-' + kind + '-' + region + '-' + glow; };
     mat.needsUpdate = true;
     return mat;
   }
@@ -416,7 +451,18 @@
     ticker.count.textContent = (idx + 1) + ' / ' + EVENTS.length;
     ticker.text.textContent = fmtDate(e.date, true) + ' · ' + e.event;
   }
-  ticker.replay.addEventListener('click', function () { seqStart = clockT + 0.3; dirty = true; });
+  ticker.replay.addEventListener('click', function () { seqStart = clockT + 0.3; tourCancelled = true; dirty = true; });
+
+  // one-time intro: right after the 22 pulses, each part lights up in its section's color, in menu order, 0.6 s each.
+  // Off with reduced motion and in ?capture=1 (unless &tour=1), and never once the reader has pointed at a part.
+  var TOUR = qs.get('tour') === '1' || (!REDUCED && !CAPTURE), TOUR_STEP = 0.6, tourCancelled = false, touring = null;
+  function tourAt(t) {
+    if (!TOUR || tourCancelled || seqStart === null) return;
+    if (current && currentHow !== 'tour') { tourCancelled = true; return; }
+    var t0 = seqStart < -1e8 ? 0.8 : seqStart + EVENTS.length * PULSE_GAP + 0.5;
+    var k = t >= t0 ? Math.floor((t - t0) / TOUR_STEP) : -1, sec = k >= 0 && k < ORDER.length ? ORDER[k] : null;
+    if (sec !== touring) { touring = sec; if (sec || currentHow === 'tour') setHover(sec, 'tour'); }
+  }
 
   /* ------------------------------------------------------------------ hover state */
   var hoverT = [0, 0, 0, 0, 0, 0];      // target 0/1 per region
@@ -424,8 +470,13 @@
   var currentReg = -1, currentHow = null, touchPick = null;
   var card = $('card'), cardHome = card.parentNode, cardSlot = $('cardSlot'), label = $('partLabel');
 
-  // how: 'pointer' (mouse on the chip), 'list' (menu item hovered or focused), 'touch' (first tap on the chip)
+  // how: 'pointer' (mouse on the chip), 'list' (menu item hovered or focused), 'touch' (first tap on the chip),
+  //      'tour' (the intro after the pulses)
   function setHover(sec, how, reg) {
+    if (how !== 'tour') {
+      if (!sec && currentHow === 'tour') return;          // moving over empty canvas doesn't stop the intro
+      if (sec) { tourCancelled = true; touring = null; }  // the reader takes over
+    }
     if (sec && (reg === undefined || reg < 0)) reg = REGIONS.findIndex(function (r) { return r.sec === sec; });
     if (sec !== current) {
       REGIONS.forEach(function (r, i) { hoverT[i] = r.sec === sec ? 1 : 0; });
@@ -457,10 +508,10 @@
     }
     card.hidden = true;
     var r = REGIONS[reg];
-    label.style.setProperty('--lc', r.color || s.color);
+    label.style.setProperty('--lc', r.lit);
     $('plName').textContent = s.name;
     $('plTake').textContent = s.short;
-    label.classList.toggle('list', how === 'list');
+    label.classList.toggle('list', how === 'list' || how === 'tour');
     label.hidden = false;
     placeLabel();
   }
@@ -473,7 +524,8 @@
     var side = a[0] < sw * 0.42 ? -1 : a[0] > sw * 0.58 ? 1 : 0;
     var px = side < 0 ? a[0] - lw + 26 : side > 0 ? a[0] - 26 : a[0] - lw / 2;
     px = Math.max(8, Math.min(px, sw - lw - 8));
-    var py = a[1] - lh - 14, below = py < 8;
+    // (the die's label hangs below it, so the lit die stays visible)
+    var py = a[1] - lh - 14, below = REGIONS[currentReg].below || py < 8;
     if (below) py = a[1] + 14;
     label.classList.toggle('below', below);
     label.style.setProperty('--ax', Math.max(12, Math.min(lw - 12, a[0] - px)).toFixed(0) + 'px');
@@ -591,7 +643,7 @@
   if (window.ResizeObserver) new ResizeObserver(fit).observe(stage); else window.addEventListener('resize', fit);
 
   /* ------------------------------------------------------------------ one frame at time t */
-  var baseYaw = -0.32, swayAmp = 0.16, hv = [0, 0, 0, 0, 0, 0], tmpV = new T.Vector3(), wallBase = new T.Color('#4cc9f0');
+  var baseYaw = -0.32, swayAmp = 0.16, hv = [0, 0, 0, 0, 0, 0], litWhite = new T.Color(), tmpV = new T.Vector3(), wallBase = new T.Color('#4cc9f0');
   function renderAt(t, dt) {
     var still = REDUCED;
     var ease = dt > 0 ? 1 - Math.exp(-dt * 10) : 1;
@@ -615,24 +667,29 @@
     glitchPass.enabled = !!(gl && gl.g.split);
     if (gl) { glitchPass.uniforms.uAmt.value = gl.u < 0.5 ? 1 : 0.6; glitchPass.uniforms.uBand.value = gl.g.band; }
     updateTicker(ev.idx);
+    tourAt(t);
 
     // hover glow eases in and out (instant with reduced motion)
     var maxH = 0;
     for (var j = 0; j < 6; j++) {
-      hv[j] = still || dt === 0 ? hoverT[j] : hv[j] + (hoverT[j] - hv[j]) * (1 - Math.exp(-dt * 12));
+      hv[j] = still || dt === 0 ? hoverT[j] : hv[j] + (hoverT[j] - hv[j]) * (1 - Math.exp(-dt * 15));   // about 200 ms
       U.uRegHover.value[j] = hv[j]; maxH = Math.max(maxH, hv[j]);
     }
-    U.uDim.value = 1 - 0.22 * maxH;
+    U.uDim.value = 1 - 0.45 * maxH;   // the rest of the chip dims so the lit part stands out
     // the light walls under the lid follow the die: site blue, amber when "compute" is lit, brighter on each pulse
     if (wallMat) {
       wallMat.color.copy(wallBase).lerp(U.uRegCol.value[1], hv[1]);
       wallMat.opacity = (0.12 * breath + 0.25 * ev.amt) * (1 - 0.6 * (maxH - hv[1])) + 0.08 * hv[1];
     }
     if (dieGlow) {
-      dieGlow.material.color.setRGB(1, 1, 1).lerp(U.uRegCol.value[1], hv[1]);
+      dieGlow.material.color.copy(GLOW_CYAN).lerp(U.uRegCol.value[1], hv[1]);
       dieGlow.material.opacity = (0.55 * breath + 0.5 * ev.amt) * (1 - 0.6 * (maxH - hv[1]));
     }
-    halo.material.opacity = 0.42 * breath + 0.25 * ev.amt;
+    halo.material.opacity = 0.42 * breath + 0.25 * ev.amt + 0.18 * maxH;
+    // the halo under the chip takes on the lit section's color (US vs China keeps the cyan: it lights two colors)
+    var top = hv.indexOf(maxH);
+    halo.material.color.copy(GLOW_CYAN);
+    if (maxH > 0.001 && REGIONS[top].sec !== 'race') halo.material.color.lerp(litWhite.set(REGIONS[top].lit), maxH * 0.85);
 
     scene.updateMatrixWorld();
     if (model) U.uToChip.value.copy(model.matrixWorld).invert();
@@ -687,7 +744,10 @@
     var r = stage.getBoundingClientRect();
     return pinXY.map(function (p) { return [r.left + p[0], r.top + p[1]]; });
   };
-  window.__chipState = function () { return { t: clockT, ready: !!model, hover: current, reduced: REDUCED, capture: CAPTURE }; };
+  window.__chipState = function () {
+    return { t: clockT, ready: !!model, hover: current, reduced: REDUCED, capture: CAPTURE,
+      tourStart: TOUR && seqStart !== null ? (seqStart < -1e8 ? 0.8 : seqStart + EVENTS.length * PULSE_GAP + 0.5) : null };
+  };
 
   /* ------------------------------------------------------------------ load the model (embedded, so file:// works) */
   var t0 = performance.now();
