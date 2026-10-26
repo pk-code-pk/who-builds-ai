@@ -24,8 +24,8 @@ body { margin: 0; color: var(--ink); font: 18px/1.6 var(--f-body); -webkit-font-
   background: var(--navy); }
 a { color: #9cc4ff; }
 b { font-weight: 700; color: #fff; }
-.core b, .csc-tip b, .hd-tip b, .lpy-tip b, .ctip b, .skip b { color: inherit; }
-.csc-tip, .hd-tip, .lpy-tip, .ctip { color: var(--navy); }
+.core b, .csc-tip b, .hd-tip b, .lpy-tip b, .skip b { color: inherit; }
+.csc-tip, .hd-tip, .lpy-tip { color: var(--navy); }
 .skip { position: absolute; left: -999px; }
 .skip:focus { left: 16px; top: 8px; z-index: 50; background: #fff; color: var(--navy); padding: .4rem .7rem; }
 .c-us { color: var(--t-us); font-weight: 700; }
@@ -209,37 +209,6 @@ main { padding-bottom: 1rem; }
 .lpy-tip.on { opacity: 1; }
 .lpy-muted { color: #52514e; }
 
-/* ---------- frame 1: 2014 vs 2026 stacked bars, and frame 7: lab bubbles ---------- */
-.sb, .lc { position: relative; }
-.sb svg, .lc svg { display: block; width: 100%; overflow: visible; }
-.sb-year { font: 700 21px var(--f-display); fill: #fff; }
-.sb-total { font: 15px var(--f-body); fill: var(--ink-2); }
-.sb-seg { cursor: pointer; }
-.sb-hit { fill: transparent; }
-.sb-mark { stroke: transparent; stroke-width: 2; transition: stroke .15s; }
-.sb-seg.on .sb-mark { stroke: #fff; }
-.sb-lbl { font-family: var(--f-body); font-weight: 600; cursor: pointer; }
-.sb-lbl.key { font-weight: 700; }
-.sb-n { fill: #fff; font-weight: 700; }
-.sb-bar { transform-box: fill-box; transform-origin: 0 50%; }
-.lc-node { cursor: pointer; }
-.lc-node circle { stroke: transparent; stroke-width: 2; transition: stroke .15s; }
-.lc-node.on circle { stroke: #fff; }
-.lc-node text { font-family: var(--f-body); font-weight: 700; pointer-events: none; }
-.lc-node .lc-n { font-weight: 600; }
-.lc-gtext { font-family: var(--f-body); }
-.lc-gname { font: 700 17px var(--f-display); }
-.lc-gsub { font-size: 14px; fill: var(--ink-2); }
-.lc-glbl { pointer-events: none; }
-.ctip { position: absolute; z-index: 5; pointer-events: none; opacity: 0; max-width: 280px; background: #fff;
-  border-radius: 8px; padding: .5rem .65rem; box-shadow: 0 8px 24px rgba(0, 0, 0, .4); font-size: 13px; line-height: 1.4; transition: opacity .1s; }
-.ctip.on { opacity: 1; }
-.ctip-muted { color: #52514e; }
-.js .draw:not(.is-drawn) .sb-bar { transform: scaleX(0); }
-.js .draw.is-drawn .sb-bar { transform: scaleX(1); transition: transform 1s cubic-bezier(.2, .7, .2, 1) calc(var(--i, 0) * 350ms); }
-.js .draw:not(.is-drawn) .sb-labels { opacity: 0; }
-.js .draw.is-drawn .sb-labels { opacity: 1; transition: opacity .5s ease calc(.7s + var(--i, 0) * 350ms); }
-
 /* ---------- main message ---------- */
 #message .frame h2.big { font: 800 clamp(2.3rem, 5.2vw, 4rem)/1.05 var(--f-display); max-width: 54rem; }
 #message .text { font-size: 1.25rem; }
@@ -247,7 +216,7 @@ main { padding-bottom: 1rem; }
 .msg-stats p { margin: 0; border-top: 2px solid #3a4b78; padding-top: .8rem; }
 .msg-stats b { display: block; font: 800 clamp(2.4rem, 5vw, 3.6rem)/1 var(--f-display); color: #fff; }
 .msg-stats span { display: block; color: var(--ink-2); font-size: 1rem; margin-top: .4rem; }
-#message .fig { margin-top: 2rem; }
+#message .card-wip { margin-top: 2rem; }
 
 /* ---------- takeaways ---------- */
 .takeaways { list-style: none; counter-reset: t; padding: 0; margin: 0 0 2rem; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.2rem; }
@@ -276,8 +245,7 @@ main { padding-bottom: 1rem; }
 .js .draw:not(.is-drawn) .lpy-mark { transform: scaleY(0); }
 .js .draw.is-drawn .lpy-mark { transform: scaleY(1); transition: transform .8s cubic-bezier(.2, .7, .2, 1) calc(var(--i, 0) * 45ms), fill .2s; }
 @media (prefers-reduced-motion: reduce) {
-  .js .reveal, .js .draw .csc-line.solid, .js .draw .csc-dot, .js .draw .lpy-mark, .js .draw .csc-labels, .js .draw .csc-line.partial,
-  .js .draw .sb-bar, .js .draw .sb-labels {
+  .js .reveal, .js .draw .csc-line.solid, .js .draw .csc-dot, .js .draw .lpy-mark, .js .draw .csc-labels, .js .draw .csc-line.partial {
     opacity: 1 !important; transform: none !important; stroke-dashoffset: 0 !important; transition: none !important; }
   .hstep, .step { transition: none; }
 }
