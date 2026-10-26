@@ -83,13 +83,10 @@
       </div>
       <aside class="stat stat-acad"><span class="stat-num">0<small> of 84</small></span><span class="stat-cap">notable models in 2026 built by universities alone</span></aside>
     </div>
-    <figure class="card-wip reveal">
-      <div class="wip-head"><span class="pill">Design draft</span><span class="owner"><i>PK</i> Praneel</span></div>
-      <div class="wip-body single">
-        <img src="img/draft_frame1_hook_dark.png" alt="Draft chart: two stacked bars. 2014 has 33 models, 21 of them academia only. 2026 has 84 models, 82 industry only and 0 academia only." />
-        <p class="wip-desc"><b>Planned D3 view:</b> two stacked bars, 2014 and 2026, split by sector. The bars grow in as you arrive and
-          hovering a block shows its count.</p>
-      </div>
+    <figure class="fig reveal draw" id="sectorFig">
+      <figcaption class="fig-head"><b>Notable AI models in 2014 and in 2026, by who built them</b><span>Hover or tap a block for its share of that year</span></figcaption>
+      <div id="sectorBars"></div>
+      <p class="fig-src">*2026 runs through Sep 30. "University + company" means a university and a company built the model together. Source: Epoch AI, Notable AI Models.</p>
     </figure>
     <p class="pull reveal">So who builds AI now?</p>
   </article>
@@ -287,13 +284,16 @@
       <p><b>50 · 32 · 27</b><span>models since 2024 from the three most active labs: OpenAI, Google and Alibaba</span></p>
     </div>
     <p class="text reveal">So where AI goes next depends on a handful of firms, and on chip policy between two governments.</p>
-    <figure class="card-wip reveal">
-      <div class="wip-head"><span class="pill">Design draft · novel view</span><span class="owner"><i>PK</i> Praneel</span></div>
-      <div class="wip-body single">
-        <img src="img/draft_frame7_bubbles_dark.png" alt="Draft chart: lab bubbles for 2024 to 2026 grouped into US, China and rest of world. The US group has 41 labs, China 27 and rest of world 21. OpenAI, Google and Alibaba are the largest circles." />
-        <p class="wip-desc"><b>Planned D3 view:</b> our lab bubbles for 2024 to 2026, pulled apart into a US group and a China group.
-          Hover a lab for its models, and toggle between one cluster and the country groups.</p>
-      </div>
+    <figure class="fig reveal" id="clusterFig">
+      <figcaption class="fig-head fig-head-row">
+        <span><b>Every lab behind a notable AI model, 2024 to Sep 30, 2026</b><span>Circle area = models the lab worked on · color = the lab's home country · hover or tap a lab</span></span>
+        <span class="seg" role="group" aria-label="Arrange the labs">
+          <button type="button" data-mode="cluster" aria-pressed="true">One cluster</button>
+          <button type="button" data-mode="country" aria-pressed="false">By country</button>
+        </span>
+      </figcaption>
+      <div id="labClusters"></div>
+      <p class="fig-src">A model built by several labs counts once for each lab (a "lab credit"). One company's research units count as one lab. A lab's country is the one it is listed under on most of its models. Source: Epoch AI, Notable AI Models.</p>
     </figure>
   </article>
 </section>
@@ -369,6 +369,8 @@
 <script src="../country-share/data/country_share.js"></script>
 <script src="../country-share/country_share_chart.js"></script>
 <script src="js/labs_per_year.js"></script>
+<script src="js/sector_bars.js"></script>
+<script src="js/lab_clusters.js"></script>
 <script src="js/hero_dots.js"></script>
 <script src="js/story.js"></script>
 </body>

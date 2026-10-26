@@ -24,12 +24,12 @@ b { color: #fff; font-weight: 700; }
 .c-acad { color: var(--t-acad); font-weight: 700; }
 
 /* ---------- hero: text left, chip right ---------- */
-.hero { position: relative; display: grid; grid-template-columns: minmax(0, 30rem) minmax(0, 1fr); gap: 1rem;
+.hero { position: relative; display: grid; grid-template-columns: minmax(0, 30rem) minmax(0, 1fr);
+  grid-template-areas: "intro stage" "menu stage"; grid-template-rows: auto auto; align-content: center; gap: 0 1.5rem;
   max-width: 88rem; margin: 0 auto; min-height: 100vh; min-height: 100svh; padding: 0 32px; }
-.intro { align-self: center; padding: 48px 0; }
-.hub { margin: 0 0 1.4rem; font-size: .95rem; }
-.hub a { text-decoration: none; font-weight: 600; }
-.hub a:hover { text-decoration: underline; }
+.intro { grid-area: intro; align-self: end; padding: 40px 0 0; }
+.stage { grid-area: stage; }
+.card-slot { display: none; }
 .kicker { margin: 0; font: 700 12px/1.3 var(--f-body); letter-spacing: .14em; text-transform: uppercase; color: var(--ink-2); }
 h1 { font: 800 clamp(2.6rem, 5.2vw, 4.6rem)/1 var(--f-display); letter-spacing: -.015em; margin: .45rem 0 1.1rem; color: #fff; }
 .lede { margin: 0 0 1.6rem; font-size: 1.18rem; color: var(--ink); }
@@ -44,24 +44,46 @@ h1 { font: 800 clamp(2.6rem, 5.2vw, 4.6rem)/1 var(--f-display); letter-spacing: 
 
 /* ---------- the 3D stage ---------- */
 .stage { position: relative; min-height: 560px; height: 100vh; height: 100svh; max-height: 980px; align-self: center; }
+
+/* ---------- section menu (next to the chip; below it on phones) ---------- */
+.menu { grid-area: menu; align-self: start; padding: 1.3rem 0 40px; }
+.menu-title { margin: 0 0 .55rem; font: 700 12px/1.3 var(--f-body); letter-spacing: .14em; text-transform: uppercase; color: var(--ink-2); }
+.sections { list-style: none; margin: 0; padding: 0; display: grid; gap: .4rem; }
+.sec { display: grid; grid-template-columns: .8rem 1fr; gap: .05rem .7rem; align-items: center; padding: .5rem .8rem;
+  border-radius: 10px; background: rgba(21, 35, 74, .55); border: 1px solid rgba(255, 255, 255, .08); color: var(--ink);
+  text-decoration: none; transition: border-color .2s, background .2s, box-shadow .2s; }
+.sec:hover, .sec:focus-visible, .sec.hot { border-color: var(--sc); background: #1a2a57; box-shadow: 0 0 0 1px var(--sc) inset; }
+.sec:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+.sec-dot { grid-row: span 2; width: .8rem; height: .8rem; border-radius: 50%; background: var(--sd, var(--sc));
+  box-shadow: 0 0 8px var(--sc); }
+.sec-name { font-weight: 700; color: #fff; font-size: 1rem; line-height: 1.3; }
+.sec-name::after { content: " →"; color: var(--ink-3); font-weight: 400; }
+.sec-take { font-size: .88rem; line-height: 1.35; color: var(--ink-2); }
+
+/* floating label at the part of the chip under the pointer (or named in the menu) */
+.part-label { position: absolute; left: 0; top: 0; z-index: 4; max-width: 17.5rem; padding: .45rem .7rem .5rem;
+  border-radius: 10px; pointer-events: none; display: grid; gap: .1rem;
+  background: rgba(11, 21, 48, .82); border: 1px solid var(--lc, #7fb3f5); box-shadow: 0 10px 24px rgba(2, 6, 20, .5); }
+.part-label[hidden] { display: none; }
+.part-label::after { content: ""; position: absolute; left: var(--ax, 50%); bottom: -6px; width: 10px; height: 10px; margin-left: -5px;
+  background: rgba(11, 21, 48, .92); border-right: 1px solid var(--lc); border-bottom: 1px solid var(--lc); transform: rotate(45deg); }
+.part-label.below::after { bottom: auto; top: -6px; transform: rotate(225deg); }
+.pl-name { font: 700 1rem/1.2 var(--f-display); color: #fff; }
+.pl-take { font-size: .85rem; line-height: 1.35; color: var(--ink); }
+.pl-go { font-size: .78rem; color: var(--ink-2); }
+.part-label.list .pl-go { display: none; }
 #chipCanvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: pan-y; cursor: grab;
   /* feather the edges into the page so the canvas has no visible box */
-  -webkit-mask-image: radial-gradient(ellipse 72% 66% at 50% 50%, #000 62%, transparent 100%);
-          mask-image: radial-gradient(ellipse 72% 66% at 50% 50%, #000 62%, transparent 100%); }
+  /* (two straight fades that reach zero at every edge, so the bloom's soft haze never shows a box) */
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 6%, #000 94%, transparent), linear-gradient(to bottom, transparent, #000 9%, #000 91%, transparent);
+  -webkit-mask-composite: source-in;
+          mask-image: linear-gradient(to right, transparent, #000 6%, #000 94%, transparent), linear-gradient(to bottom, transparent, #000 9%, #000 91%, transparent);
+          mask-composite: intersect; }
 #chipCanvas.dragging { cursor: grabbing; }
 #chipCanvas.over { cursor: pointer; }
 .loading, .nogl { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); margin: 0; color: var(--ink-2);
   font-size: .95rem; text-align: center; max-width: 22rem; }
 .nogl { color: var(--ink); }
-
-/* numbered markers that ride on the chip */
-.pins { position: absolute; inset: 0; pointer-events: none; }
-.pin { position: absolute; left: 0; top: 0; width: 24px; height: 24px; margin: -12px 0 0 -12px; border-radius: 50%;
-  display: grid; place-items: center; font: 700 12px/1 var(--f-body); color: #fff;
-  background: rgba(11, 21, 48, .72); border: 1.5px solid var(--pc, #7fb3f5);
-  box-shadow: 0 0 0 4px rgba(11, 21, 48, .35); transition: transform .2s, background .2s, opacity .3s; opacity: 0; }
-.pins.on .pin { opacity: 1; }
-.pin.hot { transform: scale(1.18); background: var(--pc); color: var(--navy); }
 
 /* glass card */
 .card { position: absolute; left: 0; top: 0; z-index: 5; width: min(19rem, calc(100% - 24px)); padding: .85rem 1rem .9rem;
@@ -86,28 +108,17 @@ h1 { font: 800 clamp(2.6rem, 5.2vw, 4.6rem)/1 var(--f-display); letter-spacing: 
   background: rgba(14, 26, 58, .66); border: 1px solid var(--navy-line); font-size: .9rem; color: var(--ink-2); }
 .tick-count { font-weight: 700; color: #9fe3ff; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .tick-text { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.tick-replay { font: inherit; font-size: .85rem; color: var(--ink); background: transparent; border: 1px solid #3a4b78;
+.tick-replay { flex: none; font: inherit; font-size: .85rem; color: var(--ink); background: transparent; border: 1px solid #3a4b78;
   border-radius: 999px; padding: .1rem .7rem; cursor: pointer; }
 .tick-replay:hover { border-color: var(--ink-2); }
 .tick-replay:focus-visible { outline: 2px solid #7fb3f5; outline-offset: 2px; }
 
-/* ---------- section list + legend ---------- */
-.explore { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 2.5rem; max-width: 88rem;
-  margin: 0 auto; padding: 2.5rem 32px 3rem; border-top: 1px solid var(--navy-line); }
+/* ---------- legend ---------- */
+.explore { max-width: 88rem; margin: 0 auto; padding: 2.5rem 32px 3rem; border-top: 1px solid var(--navy-line); }
 .explore h2 { font: 700 1.6rem/1.2 var(--f-display); margin: 0 0 .3rem; color: #fff; }
-.explore-sub { margin: 0 0 1.1rem; color: var(--ink-2); font-size: 1rem; }
-.sections { list-style: none; margin: 0; padding: 0; display: grid; gap: .7rem; }
-.sec { display: grid; grid-template-columns: 2.1rem 1fr auto; gap: .2rem .9rem; align-items: center; padding: .8rem 1rem;
-  border-radius: 12px; background: var(--card); border: 1px solid rgba(255, 255, 255, .08); color: var(--ink);
-  text-decoration: none; transition: border-color .2s, background .2s, box-shadow .2s; }
-.sec:hover, .sec:focus-visible, .sec.hot { border-color: var(--sc); background: #1a2a57; box-shadow: 0 0 0 1px var(--sc) inset; }
-.sec:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
-.sec-num { grid-row: span 2; width: 2.1rem; height: 2.1rem; border-radius: 8px; display: grid; place-items: center;
-  font-weight: 700; color: var(--navy); background: var(--sc); }
-.sec-name { font-weight: 700; color: #fff; font-size: 1.05rem; }
-.sec-where { font-size: .8rem; color: var(--ink-2); white-space: nowrap; }
-.sec-take { grid-column: 2 / span 2; font-size: .95rem; line-height: 1.45; color: var(--ink-2); }
-.legend ul { list-style: none; margin: .9rem 0 0; padding: 0; display: grid; gap: .85rem; }
+.legend ul { columns: 2 26rem; column-gap: 2.5rem; }
+.legend li { break-inside: avoid; margin-bottom: .85rem; }
+.legend ul { list-style: none; margin: .9rem 0 0; padding: 0; }
 .legend li { display: grid; grid-template-columns: 1.6rem 1fr; gap: .7rem; font-size: .97rem; line-height: 1.5; color: var(--ink-2); }
 .sw { display: block; width: 1.6rem; height: .5rem; margin-top: .55rem; border-radius: 999px; }
 .sw-us { background: var(--c-us); box-shadow: 0 0 10px rgba(57, 135, 229, .8); }
@@ -122,16 +133,16 @@ h1 { font: 800 clamp(2.6rem, 5.2vw, 4.6rem)/1 var(--f-display); letter-spacing: 
 .foot code { font-size: .85em; }
 
 /* capture mode (?capture=1): only the chip, for baking a video */
-.capture .intro, .capture .explore, .capture .foot, .capture .pins, .capture .card, .capture .ticker,
+.capture .intro, .capture .menu, .capture .card-slot, .capture .explore, .capture .foot, .capture .part-label, .capture .card, .capture .ticker,
 .capture .loading, .capture .skip { display: none !important; }
 .capture .hero { display: block; max-width: none; padding: 0; min-height: 0; background: none; }
 .capture .stage { position: fixed; left: 0; top: 0; width: 100vw; height: 100vh; max-height: none; min-height: 0; align-self: stretch; }
 .capture #chipCanvas { inset: 0; height: 100%; -webkit-mask-image: none; mask-image: none; cursor: default; }
 
-/* embed mode (?embed=1): the chip, its markers, card and ticker, plus the model credit; nothing else */
+/* embed mode (?embed=1): the chip, its labels, card and ticker, plus the model credit; nothing else */
 .embed-credit { display: none; }
 .embed body { background: transparent; }
-.embed .intro, .embed .explore, .embed .foot, .embed .hint-touch, .embed .skip { display: none !important; }
+.embed .intro, .embed .menu, .embed .card-slot, .embed .explore, .embed .foot, .embed .hint-touch, .embed .skip { display: none !important; }
 .embed .hero { display: block; max-width: none; padding: 0; min-height: 0; }
 .embed .stage { position: fixed; left: 0; top: 0; width: 100vw; height: 100vh; max-height: none; min-height: 0; margin: 0; align-self: stretch; }
 .embed #chipCanvas { inset: 0; height: 100%; }
@@ -140,26 +151,37 @@ h1 { font: 800 clamp(2.6rem, 5.2vw, 4.6rem)/1 var(--f-display); letter-spacing: 
   font-size: 11px; color: var(--ink-3); }
 .embed .embed-credit a { color: var(--ink-2); }
 
+/* ---------- short desktop windows: tighten the left column so the menu fits beside the chip ---------- */
+@media (min-width: 901px) and (max-height: 860px) {
+  .intro { padding-top: 22px; }
+  h1 { font-size: clamp(2.3rem, 4.1vw, 3.5rem); margin-bottom: .8rem; }
+  .lede { font-size: 1.04rem; margin-bottom: 1.1rem; }
+  .cta-row { margin-bottom: 1rem; }
+  .menu { padding-top: .9rem; }
+  .sec { padding: .4rem .75rem; }
+  .sec-take { font-size: .84rem; }
+}
+
 /* ---------- narrow screens: stack ---------- */
 @media (max-width: 900px) {
-  .hero { grid-template-columns: 1fr; min-height: 0; padding: 0 16px; gap: 0; }
+  .hero { grid-template-columns: 1fr; grid-template-areas: "intro" "stage" "slot" "menu"; min-height: 0; padding: 0 16px; gap: 0; }
   .intro { padding: 28px 0 0; }
+  .card-slot { grid-area: slot; display: block; }
+  .card-slot .card { position: relative; transform: none !important; width: auto; margin: .2rem 0 .6rem; }
+  .menu { padding: .6rem 0 1.6rem; }
   .lede { font-size: 1.05rem; margin-bottom: 1.1rem; }
   .cta-row { margin-bottom: .4rem; }
   .intro .hint { display: none; }
-  .hint-touch { display: block; margin: 0 0 .4rem; text-align: center; max-width: none; font-size: .9rem; }
-  .stage { height: calc(125vw + 52px); max-height: 78svh; min-height: 360px; margin-top: .2rem; }
+  .hint-touch { display: block; margin: 0 0 .6rem; max-width: none; font-size: .9rem; }
+  .stage { height: calc(66vw + 52px); max-height: 78svh; min-height: 300px; margin-top: .2rem; }   /* the chip is wider than tall */
   #chipCanvas { bottom: 52px; height: auto; }
   .ticker { bottom: 6px; font-size: .82rem; }
-  .explore { grid-template-columns: 1fr; padding: 1.8rem 16px 2rem; gap: 2rem; }
+  .explore { padding: 1.8rem 16px 2rem; }
   .foot { padding: 1.2rem 16px 2rem; }
 }
 @media (max-width: 480px) {
-  .sec { grid-template-columns: 2.1rem 1fr; }
-  .sec-where { grid-column: 2; }
-  .sec-take { grid-column: 1 / -1; }
   .card { width: min(17rem, calc(100% - 16px)); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .cta, .pin, .sec { transition: none; }
+  .cta, .sec { transition: none; }
 }
