@@ -49,6 +49,7 @@ Only needed if the Epoch CSV or the event list changes. Python 3, no extra packa
 ```bash
 python scripts/build_who_builds_data.py   # CSV -> prototype-who-builds/data/who_builds.js
 python scripts/build_country_share.py     # CSV + data/events.csv + data/prices/NVDA.csv -> country-share/data/country_share.js
+python scripts/build_frontier.py          # Epoch CSV -> story/data/frontier.js
 python scripts/build_policy_strip.py      # data/events.csv + data/prices/NVDA.csv -> story/data/policy_events.js
 python scripts/check_story_numbers.py     # recomputes every number the story states, fails if one is off
 ```
@@ -68,6 +69,8 @@ story/js/story.js                wiring: scroll steps, linked views, iframe sizi
 story/js/labs_per_year.js        frame 4 bar chart (labs per year), linked to the lab bubbles
 story/js/sector_bars.js          frame 1: 2014 vs 2026 bars by who built the models, grow in on scroll
 story/js/lab_clusters.js         frame 7: lab bubbles for 2024 to 2026, one cluster or split by home country
+story/js/frontier.js             frame 3: Amy's cost and compute frontier, log scale, Cost / Compute toggle
+story/data/frontier.js           generated frame 3 data (models with a recorded cost or compute)
 story/js/policy_strip.js         frame 6: Ashley's chip policy strip chart, one dot per event by Nvidia's 5-day move
 story/data/policy_events.js      generated frame 6 data (events + 5-day reactions)
 story/js/hero_dots.js            opening chart: all 931 models as dots, changed by the hero's scroll steps

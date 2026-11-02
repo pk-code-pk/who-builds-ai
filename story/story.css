@@ -239,6 +239,21 @@ main { padding-bottom: 1rem; }
 .js .draw.is-drawn .sb-bar { transform: scaleX(1); transition: transform 1s cubic-bezier(.2, .7, .2, 1) calc(var(--i, 0) * 350ms); }
 .js .draw:not(.is-drawn) .sb-labels { opacity: 0; }
 .js .draw.is-drawn .sb-labels { opacity: 1; transition: opacity .5s ease calc(.7s + var(--i, 0) * 350ms); }
+/* frame 3: cost and compute frontier. Bright = each year's record, muted = every other model */
+.fr { position: relative; }
+.fr svg { display: block; width: 100%; overflow: visible; }
+.fr-grid { stroke: var(--card-line); }
+.fr-tick { font: 12px var(--f-body); fill: var(--ink-2); }
+.fr-mark { fill: var(--ink-3, #8d98b6); fill-opacity: .55; stroke: transparent; stroke-width: 2; transition: stroke .15s; }
+.fr-dot.rec .fr-mark { fill: #fff; fill-opacity: .95; }
+.fr-hit { fill: transparent; }
+.fr-dot { cursor: pointer; }
+.fr-dot.on .fr-mark { stroke: #ff9090; }
+.fr-line { fill: none; stroke: #fff; stroke-width: 2; stroke-linejoin: round; pointer-events: none; }
+.fr-ann { font: 700 14px var(--f-body); fill: #fff; pointer-events: none; paint-order: stroke; stroke: var(--card); stroke-width: 4px; }
+.js .draw:not(.is-drawn) .fr-dots, .js .draw:not(.is-drawn) .fr-line, .js .draw:not(.is-drawn) .fr-ann { opacity: 0; }
+.js .draw.is-drawn .fr-dots { opacity: 1; transition: opacity .6s ease; }
+.js .draw.is-drawn .fr-line, .js .draw.is-drawn .fr-ann { opacity: 1; transition: opacity .6s ease .5s; }
 /* frame 6: chip policy strip chart. Bright = export controls, muted = everything else (same as frame 5's triangles) */
 .ps { position: relative; }
 .ps svg { display: block; width: 100%; overflow: visible; }

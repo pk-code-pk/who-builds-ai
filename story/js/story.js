@@ -34,6 +34,17 @@
   // ---------- Frame 1: 2014 vs 2026 by sector (grows in through the .draw class below) ----------
   sectorBars(document.getElementById("sectorBars"), WB);
 
+  // ---------- Frame 3: Amy's cost and compute frontier, with a Cost / Compute toggle ----------
+  const metricButtons = document.querySelectorAll("#frontierFig .seg button");
+  const frontier = frontierChart(document.getElementById("frontier"), window.FRONTIER);
+  const showMetric = k => metricButtons.forEach(b => b.setAttribute("aria-pressed", b.dataset.metric === k));
+  metricButtons.forEach(b => b.addEventListener("click", () => {
+    frontier.setMetric(b.dataset.metric);
+    showMetric(frontier.metric);
+    document.querySelector("#frontierFig .fig-head b").textContent = frontier.metric === "cost"
+      ? "The most expensive training run each year, 2012 to Sep 2026" : "The largest training compute each year, 2012 to Sep 2026";
+  }));
+
   // ---------- Frame 6: Ashley's chip policy strip chart (dots fade in through the .draw class below) ----------
   policyStrip(document.getElementById("policyStrip"), window.POLICY_EVENTS);
 

@@ -129,32 +129,16 @@
       </div>
       <aside class="stat"><span class="stat-num">$2M<small> → </small>$388M</span><span class="stat-cap">most expensive training run, 2020 vs 2025</span></aside>
     </div>
-    <figure class="card-wip reveal">
-      <div class="wip-head"><span class="pill pill-wip">In progress</span><span class="owner"><i>AM</i> Amy Munoz</span></div>
-      <div class="wip-body">
-        <div>
-          <p class="wip-title">Compute and cost frontier</p>
-          <p class="wip-desc">The most expensive training run each year, and the largest training compute, on a log scale so the
-            early years aren't flattened to zero.</p>
-          <ul class="wip-list">
-            <li>Each dot is a model with a recorded cost. The frontier line connects each year's record.</li>
-            <li>Hover a dot for the model, its lab and its cost.</li>
-          </ul>
-          <p class="wip-meta">Data: Epoch "Training compute cost (2023 USD)" and "Training compute (FLOP)"</p>
-        </div>
-        <svg class="sketch" viewBox="0 0 320 200" role="img" aria-label="Sketch of a log-scale chart where the most expensive training run climbs from about 2 million dollars in 2020 to about 388 million in 2025">
-          <g filter="url(#rough)">
-            <path class="sk-axis" d="M34 170 H304 M34 170 V18" />
-            <path class="sk-grid" d="M34 130 H304 M34 90 H304 M34 50 H304" />
-            <g class="sk-dots"><circle cx="60" cy="158" r="3"/><circle cx="78" cy="150" r="3"/><circle cx="95" cy="141" r="3"/><circle cx="104" cy="152" r="3"/><circle cx="120" cy="128" r="3"/><circle cx="138" cy="120" r="3"/><circle cx="151" cy="131" r="3"/><circle cx="168" cy="106" r="3"/><circle cx="182" cy="114" r="3"/><circle cx="196" cy="99" r="3"/><circle cx="214" cy="82" r="3"/><circle cx="230" cy="90" r="3"/><circle cx="246" cy="66" r="3"/><circle cx="262" cy="74" r="3"/><circle cx="280" cy="38" r="3"/></g>
-            <path class="sk-line" d="M60 158 L95 141 L120 128 L168 106 L196 99 L214 82 L246 66 L280 38" />
-          </g>
-          <text x="176" y="124" class="sk-txt">GPT-3 ≈ $2M</text>
-          <text x="214" y="30" class="sk-txt">Grok 4 ≈ $388M</text>
-          <text x="34" y="190" class="sk-lbl">2012</text><text x="276" y="190" class="sk-lbl">2026</text>
-          <text x="4" y="14" class="sk-lbl">log $</text>
-        </svg>
-      </div>
+    <figure class="fig reveal draw" id="frontierFig">
+      <figcaption class="fig-head fig-head-row">
+        <span><b>The most expensive training run each year, 2012 to Sep 2026</b><span>One dot per model with a recorded value · the line connects each year's record · log scale · hover or tap a dot</span></span>
+        <span class="seg" role="group" aria-label="Show cost or compute">
+          <button type="button" data-metric="cost" aria-pressed="true">Cost</button>
+          <button type="button" data-metric="flop" aria-pressed="false">Compute</button>
+        </span>
+      </figcaption>
+      <div id="frontier"></div>
+      <p class="fig-src">Chart design: Amy Munoz. Cost is Epoch's "Training compute cost (2023 USD)", recorded for 180 of the 931 models since 2012. Compute is "Training compute (FLOP)", recorded for 468. Each axis step is ten times the one below it. Source: Epoch AI, Notable AI Models.</p>
     </figure>
   </article>
 
@@ -351,6 +335,8 @@
 <script src="js/lab_clusters.js"></script>
 <script src="data/policy_events.js"></script>
 <script src="js/policy_strip.js"></script>
+<script src="data/frontier.js"></script>
+<script src="js/frontier.js"></script>
 <script src="js/hero_dots.js"></script>
 <script src="js/story.js"></script>
 </body>
