@@ -31,6 +31,27 @@
     if (pending[f.id]) f.contentWindow.postMessage({ type: "who-builds:set", ...pending[f.id] }, "*");
   }));
 
+  // ---------- Frame 1: 2014 vs 2026 by sector (grows in through the .draw class below) ----------
+  sectorBars(document.getElementById("sectorBars"), WB);
+
+  // ---------- Frame 7: lab bubbles, one cluster or pulled apart by country ----------
+  // Starts as one cluster and splits by itself the first time it is on screen, unless the reader has
+  // already picked a mode. Under reduced motion it starts split and never animates.
+  const modeButtons = document.querySelectorAll("#clusterFig .seg button");
+  const showMode = m => modeButtons.forEach(b => b.setAttribute("aria-pressed", b.dataset.mode === m));
+  const clusters = labClusters(document.getElementById("labClusters"), WB, { mode: reduce ? "country" : "cluster", onMode: showMode });
+  showMode(clusters.mode);
+  let picked = reduce;
+  modeButtons.forEach(b => b.addEventListener("click", () => { picked = true; clusters.setMode(b.dataset.mode); }));
+  if (!picked && "IntersectionObserver" in window) {
+    const io = new IntersectionObserver(entries => {
+      if (!entries.some(en => en.isIntersecting)) return;
+      io.disconnect();
+      setTimeout(() => { if (!picked) clusters.setMode("country"); }, 700);
+    }, { threshold: 0.5 });
+    io.observe(document.getElementById("labClusters"));
+  }
+
   // ---------- Frame 4: labs per year, linked to the lab bubbles ----------
   const buttons = document.querySelectorAll("#frame4 .seg button");
   function selectYears(range) {
