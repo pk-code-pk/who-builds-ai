@@ -240,32 +240,10 @@
       </div>
       <aside class="stat"><span class="stat-num">−2%</span><span class="stat-cap">median 5-day Nvidia move after a US export-control event</span></aside>
     </div>
-    <figure class="card-wip reveal">
-      <div class="wip-head"><span class="pill pill-wip">In progress</span><span class="owner"><i>AZ</i> Ashley Zheng</span></div>
-      <div class="wip-body">
-        <div>
-          <p class="wip-title">Chip policy strip chart</p>
-          <p class="wip-desc">One dot per policy event, placed by Nvidia's 5-day stock reaction and grouped by event type, with each
-            group's median marked.</p>
-          <ul class="wip-list">
-            <li>Export-control events are highlighted and share their dates with the triangles in Frame 5.</li>
-            <li>Hover a dot for the event and its reaction.</li>
-          </ul>
-          <p class="wip-meta">Working today: <a href="../chip-policy.html">Chip Policy Shock Map</a> · Data: data/events.csv, data/prices/NVDA.csv</p>
-        </div>
-        <svg class="sketch" viewBox="0 0 320 200" role="img" aria-label="Sketch of a strip chart: rows of dots for each event type spread around a zero line, export controls highlighted">
-          <g filter="url(#rough)">
-            <path class="sk-axis" d="M160 16 V176" />
-            <path class="sk-grid" d="M20 48 H304 M20 92 H304 M20 136 H304" />
-            <g class="sk-dots hot"><circle cx="102" cy="48" r="4"/><circle cx="110" cy="44" r="4"/><circle cx="126" cy="50" r="4"/><circle cx="131" cy="45" r="4"/><circle cx="142" cy="49" r="4"/><circle cx="152" cy="46" r="4"/><circle cx="164" cy="50" r="4"/><circle cx="172" cy="45" r="4"/><circle cx="188" cy="49" r="4"/><circle cx="214" cy="46" r="4"/><circle cx="226" cy="50" r="4"/></g>
-            <g class="sk-dots"><circle cx="112" cy="92" r="4"/><circle cx="140" cy="90" r="4"/><circle cx="150" cy="94" r="4"/><circle cx="168" cy="90" r="4"/><circle cx="200" cy="93" r="4"/><circle cx="236" cy="91" r="4"/><circle cx="130" cy="136" r="4"/><circle cx="156" cy="134" r="4"/><circle cx="162" cy="138" r="4"/><circle cx="176" cy="135" r="4"/><circle cx="190" cy="137" r="4"/></g>
-            <path class="sk-med" d="M152 36 V60 M150 82 V104 M160 126 V148" />
-          </g>
-          <text x="22" y="34" class="sk-txt hot">export controls</text>
-          <text x="22" y="80" class="sk-lbl">tariffs</text><text x="22" y="124" class="sk-lbl">China actions</text>
-          <text x="112" y="194" class="sk-lbl">0% Nvidia 5-day move</text>
-        </svg>
-      </div>
+    <figure class="fig reveal draw" id="policyFig">
+      <figcaption class="fig-head"><b>Nvidia's stock move in the 5 trading days after each US-China chip policy event</b><span>One dot per event. The line in each row is that group's median. Hover or tap a dot for the event</span></figcaption>
+      <div id="policyStrip"></div>
+      <p class="fig-src">Event list and design: Ashley Zheng, from Reuters, Bloomberg, the New York Times, the Financial Times, CNBC and official releases. Move = Nvidia's close 4 trading days after the event, against its close the day before (see Sources). Her full <a href="../chip-policy.html">Chip Policy Shock Map</a> compares Nvidia, AMD, TSMC and Google.</p>
     </figure>
   </article>
 </section>
@@ -331,7 +309,7 @@
     <div>
       <p class="foot-title">Who builds AI models?</p>
       <p>A data story by Praneel Khiantani, Amy Munoz and Ashley Zheng for CS 1710, Fall 2026. Prototype II, work in progress.</p>
-      <p class="foot-links"><a href="../index.html">Back to the chip</a> · <a href="../prototype-who-builds/index.html">Dashboard</a> · <a href="../country-share/index.html">Country share</a> · <a href="../chip-policy.html">Chip Policy Shock Map</a></p>
+      <p class="foot-links"><a href="../index.html">Back to the chip</a> · <a href="../prototype-who-builds/index.html">Dashboard</a> · <a href="../country-share/index.html">Country share</a> · <a href="../chip-policy.html">Chip Policy Shock Map</a> · <a href="../hub.html">Trends in AI hub</a></p>
     </div>
     <div>
       <p class="foot-title">How we counted</p>
@@ -371,6 +349,8 @@
 <script src="js/labs_per_year.js"></script>
 <script src="js/sector_bars.js"></script>
 <script src="js/lab_clusters.js"></script>
+<script src="data/policy_events.js"></script>
+<script src="js/policy_strip.js"></script>
 <script src="js/hero_dots.js"></script>
 <script src="js/story.js"></script>
 </body>

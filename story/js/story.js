@@ -34,6 +34,9 @@
   // ---------- Frame 1: 2014 vs 2026 by sector (grows in through the .draw class below) ----------
   sectorBars(document.getElementById("sectorBars"), WB);
 
+  // ---------- Frame 6: Ashley's chip policy strip chart (dots fade in through the .draw class below) ----------
+  policyStrip(document.getElementById("policyStrip"), window.POLICY_EVENTS);
+
   // ---------- Frame 7: lab bubbles, one cluster or pulled apart by country ----------
   // Starts as one cluster and splits by itself the first time it is on screen, unless the reader has
   // already picked a mode. Under reduced motion it starts split and never animates.

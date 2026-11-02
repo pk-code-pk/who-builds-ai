@@ -239,6 +239,24 @@ main { padding-bottom: 1rem; }
 .js .draw.is-drawn .sb-bar { transform: scaleX(1); transition: transform 1s cubic-bezier(.2, .7, .2, 1) calc(var(--i, 0) * 350ms); }
 .js .draw:not(.is-drawn) .sb-labels { opacity: 0; }
 .js .draw.is-drawn .sb-labels { opacity: 1; transition: opacity .5s ease calc(.7s + var(--i, 0) * 350ms); }
+/* frame 6: chip policy strip chart. Bright = export controls, muted = everything else (same as frame 5's triangles) */
+.ps { position: relative; }
+.ps svg { display: block; width: 100%; overflow: visible; }
+.ps-lbl { font: 600 15px var(--f-body); fill: var(--ink-2); }
+.ps-row.key .ps-lbl { font-weight: 700; fill: #fff; }
+.ps-sub { font: 13px var(--f-body); fill: var(--ink-2); }
+.ps-sep { stroke: var(--card-line); }
+.ps-tick { font: 12px var(--f-body); fill: var(--ink-2); }
+.ps-zero { stroke: #4a5a86; stroke-dasharray: 4 4; }
+.ps-med { stroke: var(--ink-2); stroke-width: 2; }
+.ps-row.key .ps-med { stroke: #fff; }
+.ps-mark { fill: var(--ink-3, #6b7899); fill-opacity: .75; stroke: transparent; stroke-width: 2; transition: stroke .15s; }
+.ps-row.key .ps-mark { fill: var(--ink, #fff); fill-opacity: .95; }
+.ps-hit { fill: transparent; }
+.ps-dot { cursor: pointer; }
+.ps-dot.on .ps-mark { stroke: #ff9090; }
+.js .draw:not(.is-drawn) .ps-dots { opacity: 0; }
+.js .draw.is-drawn .ps-dots { opacity: 1; transition: opacity .6s ease calc(var(--i, 0) * 120ms); }
 
 /* ---------- main message ---------- */
 #message .frame h2.big { font: 800 clamp(2.3rem, 5.2vw, 4rem)/1.05 var(--f-display); max-width: 54rem; }
